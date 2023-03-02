@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.5.1
+Build-Jdk-Spec: 11
+Extension-Name: declarative-pipeline-migration-assistant-api
+Implementation-Title: declarative-pipeline-migration-assistant-api
+Implementation-Version: 1.5.2
+Specification-Title: Declarative Pipeline Migration Assistant API (this 
+ plugin contains APIs used to convert Freestyle Jobs into Declarative Pi
+ pelines).
+Group-Id: org.jenkins-ci.plugins.to-declarative
+Short-Name: declarative-pipeline-migration-assistant-api
+Long-Name: Declarative Pipeline Migration Assistant API
+Url: https://github.com/jenkinsci/declarative-pipeline-migration-assista
+ nt-plugin
+Minimum-Java-Version: 1.8
+Plugin-Version: 1.5.2
+Hudson-Version: 2.289.3
+Jenkins-Version: 2.289.3
+Plugin-Dependencies: pipeline-model-api:1.9.2
+Plugin-Developers: 
+Support-Dynamic-Loading: true
+Plugin-License-Name: MIT License
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmUrl: https://github.com/jenkinsci/declarative-pipeline-migrati
+ on-assistant-plugin/declarative-pipeline-migration-assistant-api
+

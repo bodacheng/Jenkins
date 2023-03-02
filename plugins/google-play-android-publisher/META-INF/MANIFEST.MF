@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: chris
+Build-Jdk: 11.0.12
+Extension-Name: google-play-android-publisher
+Specification-Title: Enables Jenkins to manage and upload Android app 
+ files (AAB or APK) to Google Play.
+Implementation-Title: google-play-android-publisher
+Implementation-Version: 4.2
+Group-Id: org.jenkins-ci.plugins
+Short-Name: google-play-android-publisher
+Long-Name: Google Play Android Publisher Plugin
+Url: https://github.com/jenkinsci/google-play-android-publisher-plugin
+Minimum-Java-Version: 1.8
+Plugin-Version: 4.2
+Hudson-Version: 2.222.4
+Jenkins-Version: 2.222.4
+Plugin-Dependencies: apache-httpcomponents-client-4-api:4.5.10-2.0,goo
+ gle-oauth-plugin:1.0.0,jackson2-api:2.12.3,structs:1.22,token-macro:2
+ .12
+Plugin-Developers: Christopher Orr:orrc:chris@orr.me.uk
+Plugin-License-Name: MIT License
+Plugin-License-Url: http://opensource.org/licenses/MIT
+Plugin-ScmUrl: https://github.com/jenkinsci/google-play-android-publis
+ her-plugin
+

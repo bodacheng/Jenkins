@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: huangsuoyuan
+Build-Jdk: 1.8.0_202
+Extension-Name: list-git-branches-parameter
+Specification-Title: Assign git tag or revision number as parameter in
+  Parametrized builds
+Implementation-Title: list-git-branches-parameter
+Implementation-Version: 0.0.11
+Group-Id: org.jenkins-ci.plugins
+Short-Name: list-git-branches-parameter
+Long-Name: List Git Branches Parameter PlugIn
+Url: https://wiki.jenkins.io/display/JENKINS/List+Git+Branches+Paramet
+ er+Plugin
+Plugin-Version: 0.0.11
+Hudson-Version: 1.651.3
+Jenkins-Version: 1.651.3
+Plugin-Dependencies: rebuild:1.25;resolution:=optional,git:3.9.3,jquer
+ y:1.11.2-1
+Plugin-Developers: Huang Suoyuan:huangsuoyuan:huangsuoyuan@gmail.com,L
+ iu Jianxiong:jianxiongliu:jianxiongliu@gmail.com,Zhang Fan:wisdombyzf
+ :781516223@qq.com
+

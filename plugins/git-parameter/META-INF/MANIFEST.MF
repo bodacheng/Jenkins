@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: bklimas
+Build-Jdk: 11.0.11
+Extension-Name: git-parameter
+Specification-Title: Adds ability to choose branches, tags  or revisio
+ ns from git repositories configured in project.
+Implementation-Title: git-parameter
+Implementation-Version: 0.9.18
+Group-Id: org.jenkins-ci.tools
+Short-Name: git-parameter
+Long-Name: Git Parameter Plug-In
+Url: https://github.com/jenkinsci/git-parameter-plugin
+Minimum-Java-Version: 1.8
+Plugin-Version: 0.9.18
+Hudson-Version: 2.319.3
+Jenkins-Version: 2.319.3
+Plugin-Dependencies: rebuild:1.32;resolution:=optional,jquery3-api:3.6
+ .0-4,workflow-support:3.8,git:4.11.2
+Plugin-Developers: Boguslaw Klimas:klimas7:klimas7@gmail.com,Lukasz Mi
+ lkowski:lukanus:
+Plugin-License-Name: MIT License
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmUrl: https://github.com/jenkinsci/git-parameter-plugin
+

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Hudson-Version: 2.303.3
+Plugin-Dependencies: workflow-api:1153.vb_912c0e47fb_a_;resolution:=op
+ tional,workflow-step-api:625.vd896b_f445a_f8;resolution:=optional,wor
+ kflow-support:813.vb_d7c3d2984a_0;resolution:=optional,bouncycastle-a
+ pi:2.25,docker-commons:1.18,docker-java-api:3.2.13-37.vf3411c9828b9,d
+ urable-task:496.va67c6f9eefa7,ssh-slaves:1.806.v2253cedd3295,token-ma
+ cro:293.v283932a_0a_b_49
+Implementation-Title: Docker plugin
+Long-Name: Docker plugin
+Implementation-Version: 1.2.10
+Group-Id: io.jenkins.docker
+Minimum-Java-Version: 1.8
+Plugin-License-Name: MIT License
+Specification-Title: Docker plugin
+Plugin-ScmUrl: https://github.com/jenkinsci/docker-plugin
+Plugin-Version: 1.2.10
+Jenkins-Version: 2.303.3
+Url: https://github.com/jenkinsci/docker-plugin
+Short-Name: docker-plugin
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-Developers: Nigel Magnay:magnayn:,Nicolas De Loof:ndeloof:,Pete
+ r Darton:pjdarton:
+Build-Jdk-Spec: 1.8
+Created-By: Maven Archiver 3.5.2
+Specification-Version: 1.2
+

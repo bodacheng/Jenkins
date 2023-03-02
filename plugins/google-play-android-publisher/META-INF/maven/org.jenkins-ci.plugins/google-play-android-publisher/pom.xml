@@ -1,0 +1,219 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>4.2</version>
+    <relativePath />
+  </parent>
+
+  <properties>
+    <jenkins.version>2.222.4</jenkins.version>
+    <jenkins.bom.artifactId>2.222.x</jenkins.bom.artifactId>
+    <jenkins.bom.version>29</jenkins.bom.version>
+    <java.level>8</java.level>
+  </properties>
+
+  <artifactId>google-play-android-publisher</artifactId>
+  <version>4.2</version>
+  <packaging>hpi</packaging>
+
+  <name>Google Play Android Publisher Plugin</name>
+  <url>https://github.com/jenkinsci/google-play-android-publisher-plugin</url>
+  <description>Enables Jenkins to manage and upload Android app files (AAB or APK) to Google Play.</description>
+  <developers>
+    <developer>
+      <id>orrc</id>
+      <name>Christopher Orr</name>
+      <email>chris@orr.me.uk</email>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+
+  <dependencies>
+    <!-- There are various transitive dependencies on these APIs,
+         so include them via the Jenkins plugins, to help avoid
+         conflicts and multiple copies of the same libraries in Jenkins -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>apache-httpcomponents-client-4-api</artifactId>
+      <version>4.5.10-2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>jackson2-api</artifactId>
+      <version>2.12.3</version>
+    </dependency>
+
+    <!-- Official bindings for the Android Publisher API -->
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-androidpublisher</artifactId>
+      <version>v3-rev142-1.25.0</version>
+    </dependency>
+
+    <!-- To parse the APK file format -->
+    <dependency>
+      <groupId>net.dongliu</groupId>
+      <artifactId>apk-parser</artifactId>
+      <version>2.6.10</version>
+    </dependency>
+
+    <!-- To parse the AAB file format -->
+    <dependency>
+      <groupId>com.github.orrc</groupId>
+      <artifactId>android-bundle-basics-lib</artifactId>
+      <version>v5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>google-oauth-plugin</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>token-macro</artifactId>
+      <version>2.12</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>structs</artifactId>
+    </dependency>
+
+    <!-- Pinning these versions as various other dependencies rely on them -->
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+      <version>1.25.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.10</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>3.12.0</version>
+    </dependency>
+
+    <!-- Testing -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>3.3.3</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Install mock agent plugin when running locally, as it's very useful -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>mock-slave</artifactId>
+      <version>1.13</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Install Folders, so we can test credentials and jobs inside folders -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>cloudbees-folder</artifactId>
+      <version>6.15</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Install Pipeline when running locally, so we can test Pipelines -->
+    <!-- Versions don't need to be supplied, as they come from the BOM below -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-basic-steps</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-cps</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-durable-task-step</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-job</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Also add the Declarative Pipeline plugin, which isn't included in the BOM… -->
+    <dependency>
+      <groupId>org.jenkinsci.plugins</groupId>
+      <artifactId>pipeline-model-definition</artifactId>
+      <version>1.6.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Pinning these versions as various other dependencies rely on them -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Simplifies inclusion of plugins: https://github.com/jenkinsci/bom -->
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-${jenkins.bom.artifactId}</artifactId>
+        <version>${jenkins.bom.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <repositories>
+    <!-- Contains Jenkins artifacts and seems to cache requested artifacts from Maven Central -->
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+    <!-- For Android bundle lib -->
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+    <!-- For Android bundle lib dependencies -->
+    <repository>
+      <id>google</id>
+      <url>https://maven.google.com</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/google-play-android-publisher-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/google-play-android-publisher-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/google-play-android-publisher-plugin</url>
+    <tag>google-play-android-publisher-4.2</tag>
+  </scm>
+
+</project>
