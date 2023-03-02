@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: lacostej
+Build-Jdk: 1.7.0_79
+Extension-Name: unity3d-plugin
+Implementation-Title: unity3d-plugin
+Implementation-Version: 1.3
+Group-Id: org.jenkins-ci.plugins
+Short-Name: unity3d-plugin
+Long-Name: Jenkins Unity3d plugin
+Url: http://wiki.jenkins-ci.org/display/JENKINS/Unity3dBuilder+Plugin
+Plugin-Version: 1.3
+Hudson-Version: 1.436
+Jenkins-Version: 1.436
+Plugin-Developers: Jerome Lacoste:lacostej:jerome.lacoste@gmail.com
+

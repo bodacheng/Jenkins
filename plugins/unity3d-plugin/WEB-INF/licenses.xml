@@ -1,0 +1,9 @@
+<l:dependencies xmlns:l='licenses'>
+  <l:dependency name='Jenkins Unity3d plugin' groupId='org.jenkins-ci.plugins' artifactId='unity3d-plugin' version='1.3' url='http://wiki.jenkins-ci.org/display/JENKINS/Unity3dBuilder+Plugin'>
+    <l:description />
+  </l:dependency>
+  <l:dependency name='SLF4J API Module' groupId='org.slf4j' artifactId='slf4j-api' version='1.6.2' url='http://www.slf4j.org'>
+    <l:description>The slf4j API</l:description>
+    <l:license name='MIT License' url='http://www.opensource.org/licenses/mit-license.php' />
+  </l:dependency>
+</l:dependencies>

@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Hudson-Version: 2.289.1
+Plugin-Dependencies: config-file-provider:3.6.3,plain-credentials:1.7,
+ structs:308.v852b473a2b8c
+Implementation-Title: nodejs
+Long-Name: NodeJS Plugin
+Implementation-Version: 1.5.1
+Group-Id: org.jenkins-ci.plugins
+Minimum-Java-Version: 1.8
+Plugin-License-Name: MIT License
+Specification-Title: Executes NodeJS script as a build step.
+Plugin-ScmUrl: https://github.com/jenkinsci/nodejs-plugin
+Plugin-Version: 1.5.1
+Jenkins-Version: 2.289.1
+Url: https://github.com/jenkinsci/nodejs-plugin
+Short-Name: nodejs
+Plugin-License-Url: LICENSE.txt
+Plugin-Developers: Cliffano Subagio:cliffano:blah@cliffano.com,Frédé
+ ric Camblor:fcamblor:fcamblor@gmail.com,Nikolas Falco:nfalco79:nfalco
+ 79@hotmail.com
+Extension-Name: nodejs
+Plugin-Class: jenkins.plugins.nodejs.NodeJSPlugin
+Build-Jdk-Spec: 1.8
+Created-By: Maven Archiver 3.5.1
+

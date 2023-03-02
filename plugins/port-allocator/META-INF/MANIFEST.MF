@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: laptop
+Build-Jdk: 1.6.0_33
+Extension-Name: port-allocator
+Implementation-Title: port-allocator
+Implementation-Version: 1.8
+Plugin-Class: org.jvnet.hudson.plugins.port_allocator.PluginImpl
+Group-Id: org.jenkins-ci.plugins
+Short-Name: port-allocator
+Long-Name: Jenkins Port Allocator Plug-in
+Url: http://wiki.jenkins-ci.org/display/JENKINS/Port+Allocator+Plugin
+Plugin-Version: 1.8
+Hudson-Version: 1.424
+Jenkins-Version: 1.424
+Plugin-Developers: Rama Pulavarthi:ramapulavarthi:,Kohsuke Kawaguchi:k
+ ohsuke:,Richard Mortimer:oldelvet:,Peter Wilcsinszky:pepov:
+

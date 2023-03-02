@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Hudson-Version: 2.289.3
+Plugin-Dependencies: workflow-step-api:625.vd896b_f445a_f8,credentials
+ :2.6.1.1,ssh-credentials:277.v95c2fec1c047
+Implementation-Title: SSH Agent Plugin
+Long-Name: SSH Agent Plugin
+Implementation-Version: 295.v9ca_a_1c7cc3a_a_
+Group-Id: org.jenkins-ci.plugins
+Minimum-Java-Version: 1.8
+Plugin-License-Name: The MIT license
+Specification-Title: SSH Agent Plugin
+Plugin-ScmUrl: http://github.com/jenkinsci/ssh-agent-plugin
+Plugin-Version: 295.v9ca_a_1c7cc3a_a_
+Jenkins-Version: 2.289.3
+Url: https://github.com/jenkinsci/ssh-agent-plugin
+Short-Name: ssh-agent
+Plugin-License-Url: http://www.opensource.org/licenses/mit-license.php
+Compatible-Since-Version: 1.5
+Plugin-Developers: 
+Build-Jdk-Spec: 1.8
+Created-By: Maven Archiver 3.5.2
+Specification-Version: 0.0
+
