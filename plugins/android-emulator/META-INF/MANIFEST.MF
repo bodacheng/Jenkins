@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: Nikolas Falco
+Build-Jdk: 1.8.0_201
+Extension-Name: android-emulator
+Specification-Title: The Jenkins Plugins Parent POM Project
+Implementation-Title: android-emulator
+Implementation-Version: 3.1.3
+Group-Id: org.jenkins-ci.plugins
+Short-Name: android-emulator
+Long-Name: Android Emulator Plugin
+Url: http://wiki.jenkins-ci.org/display/JENKINS/Android+Emulator+Plugin
+Minimum-Java-Version: 1.8
+Plugin-Version: 3.1.3
+Hudson-Version: 2.138.4
+Jenkins-Version: 2.138.4
+Plugin-Dependencies: matrix-project:1.14,port-allocator:1.8
+Plugin-Developers: Christopher Orr:orrc:chris@orr.me.uk,Nikolas Falco:
+ nfalco79:nfalco79@hotmail.com
+Plugin-License-Name: The MIT License (MIT)
+Plugin-License-Url: http://opensource.org/licenses/MIT
+Plugin-ScmUrl: https://github.com/jenkinsci/plugin-pom/android-emulator
+

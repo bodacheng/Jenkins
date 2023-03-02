@@ -1,0 +1,20 @@
+<div>
+  Enter the path &mdash; or an environment variable, in the format <var>${VARIABLE_NAME}</var>
+  &mdash; where an <a href="https://developer.android.com/sdk/" target="_blank">Android SDK</a>
+  installation can be found.<br/>If you want to create emulators on-the-fly, this SDK installation
+  should have one or more platforms installed (check the &quot;<code>platforms</code>&quot; directory, or
+  the <a href="https://developer.android.com/sdk/installing/adding-packages.html" target="_blank">Android SDK
+  and AVD Manager</a>).
+<p>
+  If nothing is entered here, the Android SDK tools (under the &quot;<code>tools</code>&quot;
+  directory) will be presumed to be available on your <var>PATH</var>.<br/>Otherwise, this plugin
+  will search for an SDK installation under the following environment variables on the build host:
+</p>
+  <ul>
+    <li><var>ANDROID_SDK_ROOT</var></li>
+    <li><var>ANDROID_SDK_HOME</var></li>
+    <li><var>ANDROID_HOME</var></li>
+    <li><var>ANDROID_SDK</var></li>
+  </ul>
+Alternatively, select the option below to have the Android SDK installed automatically when it is needed.
+</div>

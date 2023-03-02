@@ -1,0 +1,17 @@
+Adding custom hardware properties allows you to override the default values for an AVD.<br/>
+For example, you can alter the amount of RAM available to each process (via the <code>vm.heapSize</code>
+property), or you can alter physical features of the emulated device, such as the presence of a keyboard.
+<p>
+A list of common properties, along with their descriptions and default values can be found in the
+&quot;<a href="https://developer.android.com/tools/devices/managing-avds-cmdline.html#hardwareopts">Setting
+hardware emulation options</a>&quot; section of the Android Developers' site.
+</p>
+<p>
+To set a new hardware feature (or override a default value), enter the property name and the desired value.<br/>
+Generally, boolean properties should be either <em>yes</em> or <em>no</em> rather than true or false.
+</p>
+<p>
+Hardware properties configured here will be added to the appropriate AVD next time this job runs.<br/>
+However, removing hardware properties from the job configuration will not remove these properties from the AVD
+&mdash; the previously-added properties will remain.
+</p>

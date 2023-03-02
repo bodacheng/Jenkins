@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: stjohnr
+Build-Jdk: 1.8.0_112
+Extension-Name: android-signing
+Specification-Title: A Jenkins build step for signing Android APKs wit
+ h Jenkins-managed credentials
+Implementation-Title: android-signing
+Implementation-Version: 2.2.5
+Group-Id: org.jenkins-ci.plugins
+Short-Name: android-signing
+Long-Name: Android Signing Plugin
+Url: http://wiki.jenkins-ci.org/display/JENKINS/Android+Signing+Plugin
+Compatible-Since-Version: 2.1.0
+Plugin-Version: 2.2.5
+Hudson-Version: 1.642.3
+Jenkins-Version: 1.642.3
+Plugin-Dependencies: workflow-cps:2.0;resolution:=optional,credentials
+ :2.1.0,job-dsl:1.58;resolution:=optional
+Plugin-Developers: Robert St. John:restjohn:restjohn@gmail.com
+
