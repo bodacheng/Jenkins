@@ -1,0 +1,18 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<hudson.model.UserIdMapper>
+  <version>1</version>
+  <idToDirectoryNameMap class="concurrent-hash-map">
+    <entry>
+      <string>bodacheng</string>
+      <string>bodacheng_17390557680757721036</string>
+    </entry>
+    <entry>
+      <string>bo_dacheng</string>
+      <string>bodacheng_13683130822109792241</string>
+    </entry>
+    <entry>
+      <string>bodacheng123</string>
+      <string>bodacheng123_11081182589738172086</string>
+    </entry>
+  </idToDirectoryNameMap>
+</hudson.model.UserIdMapper>
