@@ -3,5 +3,14 @@
 /cache
 /caches
 /logs
-/jobs
 /fingerprints
+
+/jobs/Androidcbuild/builds
+/jobs/AndroidReleaseBuild/builds
+/jobs/AssetDev/builds
+/jobs/iOSReleaseBuild/builds
+/jobs/MCombat_Android/builds
+/jobs/Upload_AppCenter/builds
+/jobs/Build_Android_dev/builds
+/jobs/Build_IOS_dev/builds
+/jobs/CustomIOSBuild/builds
