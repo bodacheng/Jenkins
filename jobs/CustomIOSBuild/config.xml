@@ -32,7 +32,7 @@
       <parameterDefinitions>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>b4465899-a833-4a53-8d6b-f2e152cff0c1</uuid>
+          <uuid>1dda1a06-0f4b-412c-969e-d1a4bfc6c915</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>
@@ -65,7 +65,7 @@
           <description>クライアントのビルド種別</description>
           <quoteValue>false</quoteValue>
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
-          <visibleItemCount>3</visibleItemCount>
+          <visibleItemCount>2</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
           <value>Dev,Release</value>
           <defaultValue>Release</defaultValue>
@@ -76,7 +76,7 @@
           <description>アセットの利用種別（Alpha,Test,Beta)</description>
           <quoteValue>false</quoteValue>
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
-          <visibleItemCount>4</visibleItemCount>
+          <visibleItemCount>2</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
           <value>Dev,Release</value>
           <defaultValue>Release</defaultValue>
@@ -101,7 +101,12 @@
         <hudson.model.TextParameterDefinition>
           <name>APPCENTER_API_TOKEN</name>
           <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
-          <defaultValue>f15e49718855b8bba0a8d3104c4e6fcf48193865</defaultValue>
+          <defaultValue>68a003903bddc341ff5fc9c18429994f0c2c997c</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>APPCENTER_API_TOKEN_RELEASE</name>
+          <defaultValue>c403c952e5b4cc2a91a53e4baced2d17e3fa376e</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
