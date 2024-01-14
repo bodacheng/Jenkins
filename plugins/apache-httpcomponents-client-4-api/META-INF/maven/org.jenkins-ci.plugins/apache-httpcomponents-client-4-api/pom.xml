@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>apache-httpcomponents-client-4-api</artifactId>
-  <version>4.5.13-138.v4e7d9a_7b_a_e61</version>
+  <version>4.5.14-150.v7a_b_9d17134a_5</version>
   <packaging>hpi</packaging>
   <name>Jenkins Apache HttpComponents Client 4.x API Plugin</name>
   <description>Bundles Apache HttpComponents Client 4.x and allows it to be used by Jenkins plugins</description>
@@ -23,9 +23,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/apache-httpcomponents-client-4-api-plugin.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/apache-httpcomponents-client-4-api-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/apache-httpcomponents-client-4-api-plugin.git</developerConnection>
-    <tag>4e7d9a7bae61f816f95f6fc1fb144e6ed40895f1</tag>
+    <tag>7ab9d17134a5926b061f8f25a1f7787b2fea990f</tag>
     <url>https://github.com/jenkinsci/apache-httpcomponents-client-4-api-plugin</url>
   </scm>
   <distributionManagement>
@@ -42,19 +42,19 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
-      <version>4.4.15</version>
+      <version>4.4.16</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-nio</artifactId>
-      <version>4.4.15</version>
+      <version>4.4.16</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
+      <version>4.5.14</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -66,37 +66,37 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpmime</artifactId>
-      <version>4.5.13</version>
+      <version>4.5.14</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>fluent-hc</artifactId>
-      <version>4.5.13</version>
+      <version>4.5.14</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient-cache</artifactId>
-      <version>4.5.13</version>
+      <version>4.5.14</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpasyncclient</artifactId>
-      <version>4.1.4</version>
+      <version>4.1.5</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpasyncclient-cache</artifactId>
-      <version>4.1.4</version>
+      <version>4.1.5</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>jenkins-core</artifactId>
-      <version>2.319.1</version>
+      <version>2.361.4</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -110,20 +110,6 @@
       <artifactId>javax.servlet-api</artifactId>
       <version>3.1.0</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.jcip</groupId>
-      <artifactId>jcip-annotations</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>animal-sniffer-annotations</artifactId>
-      <version>1.21</version>
-      <scope>provided</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -143,13 +129,7 @@
       <plugin>
         <groupId>org.jenkins-ci.tools</groupId>
         <artifactId>maven-hpi-plugin</artifactId>
-        <version>3.28</version>
-        <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <groupId>org.kohsuke.stapler</groupId>
-        <artifactId>maven-stapler-plugin</artifactId>
-        <version>1.17</version>
+        <version>3.38</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>

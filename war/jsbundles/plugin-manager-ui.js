@@ -1,7 +1,7 @@
 /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 8389:
+/***/ 4199:
 /***/ (function(__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10,16 +10,16 @@
 var debounce = __webpack_require__(875);
 var debounce_default = /*#__PURE__*/__webpack_require__.n(debounce);
 // EXTERNAL MODULE: ./src/main/js/templates/plugin-manager/available.hbs
-var available = __webpack_require__(7070);
+var available = __webpack_require__(4746);
 var available_default = /*#__PURE__*/__webpack_require__.n(available);
-// EXTERNAL MODULE: ./.yarn/cache/jquery-npm-3.6.1-6f29087f48-6177d866a7.zip/node_modules/jquery/dist/jquery.js
-var jquery = __webpack_require__(4655);
+// EXTERNAL MODULE: ./.yarn/cache/jquery-npm-3.7.1-eeeac0f21e-4370b8139d.zip/node_modules/jquery/dist/jquery.js
+var jquery = __webpack_require__(4198);
 var jquery_default = /*#__PURE__*/__webpack_require__.n(jquery);
 // EXTERNAL MODULE: ./.yarn/cache/window-handle-npm-1.0.1-369b8e9cbe-8f2c183a0d.zip/node_modules/window-handle/index.js
 var window_handle = __webpack_require__(30);
-// EXTERNAL MODULE: ./.yarn/cache/handlebars-npm-4.7.7-a9ccfabf80-1e79a43f5e.zip/node_modules/handlebars/dist/cjs/handlebars.runtime.js
-var handlebars_runtime = __webpack_require__(9856);
-var handlebars_runtime_default = /*#__PURE__*/__webpack_require__.n(handlebars_runtime);
+// EXTERNAL MODULE: ./.yarn/cache/handlebars-npm-4.7.8-25244c2c82-00e68bb5c1.zip/node_modules/handlebars/runtime.js
+var runtime = __webpack_require__(4389);
+var runtime_default = /*#__PURE__*/__webpack_require__.n(runtime);
 ;// CONCATENATED MODULE: ./src/main/js/util/jenkins.js
 /**
  * Jenkins JS Modules common utility functions
@@ -37,41 +37,6 @@ jenkins.baseUrl = function () {
     u = "";
   }
   return u;
-};
-
-// awful hack to get around JSONifying things with Prototype taking over wrong. ugh. Prototype is the worst.
-jenkins.stringify = function (o) {
-  if (Array.prototype.toJSON) {
-    // Prototype f's this up something bad
-    var protoJSON = {
-      a: Array.prototype.toJSON,
-      o: Object.prototype.toJSON,
-      h: Hash.prototype.toJSON,
-      s: String.prototype.toJSON
-    };
-    try {
-      delete Array.prototype.toJSON;
-      delete Object.prototype.toJSON;
-      delete Hash.prototype.toJSON;
-      delete String.prototype.toJSON;
-      return JSON.stringify(o);
-    } finally {
-      if (protoJSON.a) {
-        Array.prototype.toJSON = protoJSON.a;
-      }
-      if (protoJSON.o) {
-        Object.prototype.toJSON = protoJSON.o;
-      }
-      if (protoJSON.h) {
-        Hash.prototype.toJSON = protoJSON.h;
-      }
-      if (protoJSON.s) {
-        String.prototype.toJSON = protoJSON.s;
-      }
-    }
-  } else {
-    return JSON.stringify(o);
-  }
 };
 
 /**
@@ -103,7 +68,7 @@ jenkins.get = function (url, success, options) {
 };
 
 /**
- * Jenkins AJAX POST callback, formats data as a JSON object post (note: works around prototype.js ugliness using stringify() above)
+ * Jenkins AJAX POST callback, formats data as a JSON object post
  * If last parameter is an object, will be extended to jQuery options (e.g. pass { error: function() ... } to handle errors)
  */
 jenkins.post = function (url, data, success, options) {
@@ -129,7 +94,7 @@ jenkins.post = function (url, data, success, options) {
       formBody = jquery_default().extend({}, formBody);
       formBody[crumb.fieldName] = crumb.value;
     }
-    formBody = jenkins.stringify(formBody);
+    formBody = JSON.stringify(formBody);
   }
   var args = {
     url: jenkins.baseUrl() + url,
@@ -151,7 +116,7 @@ jenkins.post = function (url, data, success, options) {
  *  handlebars setup, done for backwards compatibility because some plugins depend on it
  */
 jenkins.initHandlebars = function () {
-  return (handlebars_runtime_default());
+  return (runtime_default());
 };
 
 /**
@@ -637,6 +602,7 @@ function applyFilter(searchQuery) {
       admin
     });
     tbody.insertAdjacentHTML("beforeend", rows);
+    updateInstallButtonState();
   });
 }
 var handleFilter = function (e) {
@@ -653,14 +619,41 @@ document.addEventListener("DOMContentLoaded", function () {
   setTimeout(function () {
     layoutUpdateCallback.call();
   }, 350);
+
+  // Show update center error if element exists
+  const updateCenterError = document.querySelector("#update-center-error");
+  if (updateCenterError) {
+    notificationBar.show(updateCenterError.content.textContent, notificationBar.ERROR);
+  }
 });
+function updateInstallButtonState() {
+  // Enable/disable the 'Install' button depending on if any plugins are checked
+  const anyCheckboxesSelected = () => {
+    return document.querySelectorAll("input[type='checkbox']:checked").length > 0;
+  };
+  const installButton = document.querySelector("#button-install");
+  const installAfterRestartButton = document.querySelector("#button-install-after-restart");
+  if (!anyCheckboxesSelected()) {
+    installButton.disabled = true;
+    installAfterRestartButton.disabled = true;
+  }
+  const checkboxes = document.querySelectorAll("input[type='checkbox']");
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener("click", () => {
+      setTimeout(() => {
+        installButton.disabled = !anyCheckboxesSelected();
+        installAfterRestartButton.disabled = !anyCheckboxesSelected();
+      });
+    });
+  });
+}
 
 /***/ }),
 
-/***/ 7070:
+/***/ 4746:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(2280);
+var Handlebars = __webpack_require__(4389);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression, alias3=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -689,9 +682,8 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
     + ((stack1 = lookupProperty(helpers,"if").call(alias3,(depth0 != null ? lookupProperty(depth0,"unresolvedSecurityWarnings") : depth0),{"name":"if","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":38,"column":12},"end":{"line":51,"column":19}}})) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(alias3,(depth0 != null ? lookupProperty(depth0,"deprecated") : depth0),{"name":"if","hash":{},"fn":container.program(14, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":52,"column":12},"end":{"line":56,"column":19}}})) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(alias3,(depth0 != null ? lookupProperty(depth0,"adoptMe") : depth0),{"name":"if","hash":{},"fn":container.program(16, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":57,"column":12},"end":{"line":61,"column":19}}})) != null ? stack1 : "")
-    + ((stack1 = lookupProperty(helpers,"if").call(alias3,(depth0 != null ? lookupProperty(depth0,"newerVersionAvailableNotOffered") : depth0),{"name":"if","hash":{},"fn":container.program(18, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":62,"column":12},"end":{"line":66,"column":19}}})) != null ? stack1 : "")
     + "        </td>\n"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias3,(depth0 != null ? lookupProperty(depth0,"releaseTimestamp") : depth0),{"name":"if","hash":{},"fn":container.program(20, data, 0),"inverse":container.program(22, data, 0),"data":data,"loc":{"start":{"line":68,"column":8},"end":{"line":76,"column":15}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"if").call(alias3,(depth0 != null ? lookupProperty(depth0,"releaseTimestamp") : depth0),{"name":"if","hash":{},"fn":container.program(18, data, 0),"inverse":container.program(20, data, 0),"data":data,"loc":{"start":{"line":63,"column":8},"end":{"line":71,"column":15}}})) != null ? stack1 : "")
     + "    </tr>\n";
 },"2":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -804,17 +796,6 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
     + ((stack1 = container.lambda((depth0 != null ? lookupProperty(depth0,"adoptMe") : depth0), depth0)) != null ? stack1 : "")
     + "\n                </div>\n";
 },"18":function(container,depth0,helpers,partials,data) {
-    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
-        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
-          return parent[propertyName];
-        }
-        return undefined
-    };
-
-  return "                <div class=\"alert alert-info\">\n                    "
-    + ((stack1 = container.lambda((depth0 != null ? lookupProperty(depth0,"newerVersionAvailableNotOffered") : depth0), depth0)) != null ? stack1 : "")
-    + "\n                </div>\n";
-},"20":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -829,7 +810,7 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
     + "\">\n                    "
     + alias2(alias1(((stack1 = (depth0 != null ? lookupProperty(depth0,"releaseTimestamp") : depth0)) != null ? lookupProperty(stack1,"displayValue") : stack1), depth0))
     + "\n                </time>\n            </td>\n";
-},"22":function(container,depth0,helpers,partials,data) {
+},"20":function(container,depth0,helpers,partials,data) {
     return "            <td style=\"width: 25%\"></td>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -839,7 +820,7 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
         return undefined
     };
 
-  return ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"plugins") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":1,"column":0},"end":{"line":78,"column":9}}})) != null ? stack1 : "");
+  return ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"plugins") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":1,"column":0},"end":{"line":73,"column":9}}})) != null ? stack1 : "");
 },"useData":true});
 
 /***/ })
@@ -1019,7 +1000,7 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, [216], function() { return __webpack_require__(8389); })
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, [216], function() { return __webpack_require__(4199); })
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

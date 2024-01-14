@@ -4,14 +4,14 @@ Build-Jdk-Spec: 11
 Specification-Title: commons-text API Plugin
 Specification-Version: 1.10
 Implementation-Title: commons-text API Plugin
-Implementation-Version: 1.10.0-27.vb_fa_3896786a_7
+Implementation-Version: 1.10.0-36.vc008c8fcda_7b_
 Group-Id: io.jenkins.plugins
 Short-Name: commons-text-api
 Long-Name: commons-text API Plugin
 Url: https://github.com/jenkinsci/commons-text-api-plugin
-Plugin-Version: 1.10.0-27.vb_fa_3896786a_7
-Hudson-Version: 2.289.1
-Jenkins-Version: 2.289.1
+Plugin-Version: 1.10.0-36.vc008c8fcda_7b_
+Hudson-Version: 2.361.1
+Jenkins-Version: 2.361.1
 Plugin-Dependencies: commons-lang3-api:3.12.0-36.vd97de6465d5b_
 Plugin-Developers: 
 Support-Dynamic-Loading: true

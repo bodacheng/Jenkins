@@ -23,7 +23,7 @@
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>-1</daysToKeep>
-        <numToKeep>60</numToKeep>
+        <numToKeep>10</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
@@ -32,7 +32,7 @@
       <parameterDefinitions>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>1dda1a06-0f4b-412c-969e-d1a4bfc6c915</uuid>
+          <uuid>e0c4ea4b-191a-4ef8-b277-fa09c21c3778</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>
@@ -57,7 +57,7 @@
           <visibleItemCount>1</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
           <value>2020.3.21f1,2021.3.2f1</value>
-          <defaultValue>2020.3.21f1</defaultValue>
+          <defaultValue>2021.3.2f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
         <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@359.v35dcfdd0c20d">
@@ -90,7 +90,7 @@
           <visibleItemCount>2</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
           <value>ARM64,ARMv7;ARM64</value>
-          <defaultValue>ARM64</defaultValue>
+          <defaultValue>ARM64,ARMv7</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
         <hudson.model.TextParameterDefinition>

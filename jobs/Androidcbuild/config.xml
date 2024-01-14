@@ -13,13 +13,6 @@
   <displayName>CustomAndroidbuild</displayName>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.36.0">
-      <projectUrl>https://github.com/bodacheng/MComat.git/</projectUrl>
-      <displayName>Custom_Android_build</displayName>
-    </com.coravy.hudson.plugins.github.GithubProjectProperty>
-    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
-      <abortPrevious>false</abortPrevious>
-    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>-1</daysToKeep>
@@ -28,11 +21,18 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.36.0">
+      <projectUrl>https://github.com/bodacheng/MComat.git/</projectUrl>
+      <displayName>Custom_Android_build</displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>b4cdf4dc-8289-4207-913b-355cc6d2c149</uuid>
+          <uuid>e5df9bd2-7b8c-4800-94c5-851a1d79a2f5</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>
@@ -101,7 +101,7 @@
         <hudson.model.TextParameterDefinition>
           <name>APPCENTER_API_TOKEN</name>
           <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
-          <defaultValue>f15e49718855b8bba0a8d3104c4e6fcf48193865</defaultValue>
+          <defaultValue>7310d13c287de119278dd63eb787d18fb10b0f4b</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>

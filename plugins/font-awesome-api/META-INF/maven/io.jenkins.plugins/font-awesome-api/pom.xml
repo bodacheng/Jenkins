@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>font-awesome-api</artifactId>
-  <version>6.2.0-3</version>
+  <version>6.4.0-1</version>
   <packaging>hpi</packaging>
   <name>Font Awesome API Plugin</name>
   <description>Provides the free fonts of Font Awesome for Jenkins plugins.</description>
@@ -24,9 +24,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/font-awesome-api-plugin.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/font-awesome-api-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/font-awesome-api-plugin.git</developerConnection>
-    <tag>v6.2.0-3</tag>
+    <tag>v6.4.0-1</tag>
     <url>https://github.com/jenkinsci/font-awesome-api-plugin</url>
   </scm>
   <distributionManagement>
@@ -43,46 +43,8 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>2.16.0</version>
+      <version>3.2.1</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-core</artifactId>
-      <version>2.346.3</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.jcip</groupId>
-      <artifactId>jcip-annotations</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>animal-sniffer-annotations</artifactId>
-      <version>1.21</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.2</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
   <repositories>
@@ -100,13 +62,7 @@
       <plugin>
         <groupId>org.jenkins-ci.tools</groupId>
         <artifactId>maven-hpi-plugin</artifactId>
-        <version>3.32</version>
-        <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <groupId>org.kohsuke.stapler</groupId>
-        <artifactId>maven-stapler-plugin</artifactId>
-        <version>1.18</version>
+        <version>3.46</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>

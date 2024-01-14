@@ -18,7 +18,7 @@
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>-1</daysToKeep>
-        <numToKeep>30</numToKeep>
+        <numToKeep>5</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
@@ -27,7 +27,7 @@
       <parameterDefinitions>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>d6dd34d2-6665-4272-8dd0-a86fe9d5cfe0</uuid>
+          <uuid>01f58587-7949-4170-9477-5c4146fd4b7e</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>

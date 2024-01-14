@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>ionicons-api</artifactId>
-  <version>31.v4757b_6987003</version>
+  <version>56.v1b_1c8c49374e</version>
   <packaging>hpi</packaging>
   <name>Ionicons API</name>
   <description>The Jenkins Plugins Parent POM Project</description>
@@ -23,10 +23,10 @@
       <name>Alexander Brandes</name>
     </developer>
   </developers>
-  <scm>
-    <connection>scm:git:https://github.com/jenkinsci/ionicons-api-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/ionicons-api-plugin.git</developerConnection>
-    <tag>4757b69870037c4aadad7057e29db2e424c1a7af</tag>
+  <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
+    <connection>scm:git:https://github.com/jenkinsci/ionicons-api-plugin</connection>
+    <developerConnection>scm:git:https://github.com/jenkinsci/ionicons-api-plugin</developerConnection>
+    <tag>1b1c8c49374e1efa84e7ca5680593a148be51963</tag>
     <url>https://github.com/jenkinsci/ionicons-api-plugin</url>
   </scm>
   <distributionManagement>
@@ -39,46 +39,6 @@
       <url>https://repo.jenkins-ci.org/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-core</artifactId>
-      <version>2.346.1</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.jcip</groupId>
-      <artifactId>jcip-annotations</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>animal-sniffer-annotations</artifactId>
-      <version>1.22</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.2</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
@@ -90,7 +50,7 @@
       <plugin>
         <groupId>org.jenkins-ci.tools</groupId>
         <artifactId>maven-hpi-plugin</artifactId>
-        <version>3.34</version>
+        <version>3.44</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>

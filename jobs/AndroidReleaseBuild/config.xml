@@ -31,7 +31,7 @@
       <parameterDefinitions>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>1ece8a7a-4ffa-4011-80c7-f615820f8be6</uuid>
+          <uuid>dafab33a-e31b-44b5-b683-792d6e735a3e</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>
@@ -62,7 +62,7 @@
         <hudson.model.TextParameterDefinition>
           <name>APPCENTER_API_TOKEN</name>
           <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
-          <defaultValue>d6bb0f4d7c0a97d54b3fcc9d7e42054051b2e7c0</defaultValue>
+          <defaultValue>45db60d0ab05289c158dfc6f24b1fffcd74806c8</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>

@@ -4,21 +4,27 @@ Build-Jdk-Spec: 11
 Specification-Title: JUnit Plugin
 Specification-Version: 0.0
 Implementation-Title: JUnit Plugin
-Implementation-Version: 1160.vf1f01a_a_ea_b_7f
+Implementation-Version: 1207.va_09d5100410f
 Group-Id: org.jenkins-ci.plugins
+Artifact-Id: junit
 Short-Name: junit
 Long-Name: JUnit Plugin
 Url: https://github.com/jenkinsci/junit-plugin
-Plugin-Version: 1160.vf1f01a_a_ea_b_7f
-Hudson-Version: 2.346.3
-Jenkins-Version: 2.346.3
-Plugin-Dependencies: bootstrap5-api:5.2.0-1,checks-api:1.7.5,echarts-api
- :5.4.0-1,ionicons-api:31.v4757b_6987003,plugin-util-api:2.17.0,workflow
- -api:1200.v8005c684b_a_c6,workflow-step-api:639.v6eca_cd8c04a_a_,displa
- y-url-api:2.3.6,jackson2-api:2.13.4.20221013-295.v8e29ea_354141,script-
- security:1189.vb_a_b_7c8fd5fde
+Plugin-Version: 1207.va_09d5100410f
+Hudson-Version: 2.387.1
+Jenkins-Version: 2.387.1
+Plugin-Dependencies: bootstrap5-api:5.2.2-4,checks-api:2.0.0,echarts-api
+ :5.4.0-4,ionicons-api:45.vf54fca_5d2154,plugin-util-api:3.2.1,workflow-
+ api:1213.v646def1087f9,workflow-step-api:639.v6eca_cd8c04a_a_,display-u
+ rl-api:2.3.7,jackson2-api:2.15.1-344.v6eb_55303dc3e,script-security:124
+ 4.ve463715a_f89c
 Plugin-Developers: 
 Plugin-License-Name: MIT
 Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/junit-plugin.
+ git
+Plugin-ScmTag: a09d5100410ff329f0bcf02e564e4e192383fb4e
 Plugin-ScmUrl: https://github.com/jenkinsci/junit-plugin
+Plugin-GitHash: a09d5100410ff329f0bcf02e564e4e192383fb4e
+Implementation-Build: a09d5100410ff329f0bcf02e564e4e192383fb4e
 
