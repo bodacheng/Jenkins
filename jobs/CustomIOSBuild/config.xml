@@ -32,7 +32,7 @@
       <parameterDefinitions>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>e0c4ea4b-191a-4ef8-b277-fa09c21c3778</uuid>
+          <uuid>5446d552-0795-4247-993a-71a2b5d76f43</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>
@@ -44,6 +44,18 @@
           <quickFilterEnabled>false</quickFilterEnabled>
           <listSize>5</listSize>
         </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>GIT_URL</name>
+          <description>这个项目配置里填写了多次项目地址，但是我们没找到什么方式把这个给简化。</description>
+          <defaultValue>https://github.com/bodacheng/MComat.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>machine_name</name>
+          <description>用的哪台电脑。这个是针对不同的build用机器，最终目的是在客户端的/Assets/App/Editor/Build/Configs/iOS之后区分对应的出力文件。</description>
+          <defaultValue>my</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>RELEASENOTE</name>
           <description>リリースノートです（appcenterに表示します）</description>
@@ -93,11 +105,12 @@
           <defaultValue>ARM64,ARMv7</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>CREDENTIAL</name>
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1214.v1de940103927">
+          <name>GIT_CREDENTIAL</name>
           <defaultValue>bodacheng1</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
+          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
+          <required>true</required>
+        </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>APPCENTER_API_TOKEN</name>
           <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
