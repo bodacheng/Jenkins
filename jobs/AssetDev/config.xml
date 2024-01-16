@@ -25,9 +25,20 @@
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <hudson.model.TextParameterDefinition>
+          <name>GIT_URL</name>
+          <defaultValue>https://github.com/bodacheng/MComat.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1214.v1de940103927">
+          <name>GIT_CREDENTIAL</name>
+          <defaultValue>bodacheng1</defaultValue>
+          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
+          <required>true</required>
+        </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
           <name>BRANCH</name>
-          <uuid>01f58587-7949-4170-9477-5c4146fd4b7e</uuid>
+          <uuid>c14492d5-2ec4-4d42-bb2e-9745cf261c0c</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng1</credentialsId>
           <defaultValue></defaultValue>
