@@ -14,7 +14,7 @@
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.46.0">
-      <projectUrl>https://bodacheng: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@github.com/bodacheng/MComat.git/</projectUrl>
+      <projectUrl>https://github.com/bodacheng/MComat.git/</projectUrl>
       <displayName>Custom_IOS_build</displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -43,8 +43,8 @@
         </hudson.model.TextParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>f06f728a-fdc5-4f89-b664-cc5f11230aa4</uuid>
-          <remoteURL>https://bodacheng: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@github.com/bodacheng/MComat.git</remoteURL>
+          <uuid>208c6cf7-279d-4f0f-a513-59da2d2df456</uuid>
+          <remoteURL>https://github.com/bodacheng/MComat.git/</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
           <type>PT_BRANCH</type>
@@ -58,7 +58,7 @@
         <hudson.model.TextParameterDefinition>
           <name>GIT_URL</name>
           <description>这个项目配置里填写了多次项目地址，但是我们没找到什么方式把这个给简化。</description>
-          <defaultValue>https://bodacheng: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@github.com/bodacheng/MComat.git</defaultValue>
+          <defaultValue>https://github.com/bodacheng/MComat.git</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
@@ -163,7 +163,7 @@
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>https://bodacheng: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@github.com/bodacheng/MCombat_tool.git</url>
+          <url>https://bodacheng@github.com/bodacheng/MCombat_tool.git</url>
           <credentialsId>bodacheng</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
