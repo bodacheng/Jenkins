@@ -1,0 +1,185 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1385.vb_58b_86ea_fff1">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2168.vf921b_4e72c73"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2168.vf921b_4e72c73">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>iOSカスタムビルド</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.38.0">
+      <projectUrl>https://bodacheng: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@github.com/bodacheng/PocketStriker.git/</projectUrl>
+      <displayName>Custom_IOS_build_v</displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.TextParameterDefinition>
+          <name>project_code</name>
+          <defaultValue>v</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
+          <name>BRANCH</name>
+          <uuid>37fdffa7-0c64-4017-a49b-6b23cd84345d</uuid>
+          <remoteURL>https://github.com/bodacheng/PocketStriker.git</remoteURL>
+          <credentialsId>bodacheng</credentialsId>
+          <defaultValue></defaultValue>
+          <type>PT_BRANCH</type>
+          <tagFilter>*</tagFilter>
+          <branchFilter>.*</branchFilter>
+          <sortMode>NONE</sortMode>
+          <selectedValue>NONE</selectedValue>
+          <quickFilterEnabled>false</quickFilterEnabled>
+          <listSize>10</listSize>
+        </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>GIT_URL</name>
+          <description>这个项目配置里填写了多次项目地址，但是我们没找到什么方式把这个给简化。</description>
+          <defaultValue>https://bodacheng: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@github.com/bodacheng/PocketStriker.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>machine_name</name>
+          <description>用的哪台电脑。这个是针对不同的build用机器，最终目的是在客户端的/Assets/App/Editor/Build/Configs/iOS之后区分对应的出力文件。</description>
+          <defaultValue>rudel</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>RELEASENOTE</name>
+          <description>リリースノートです（appcenterに表示します）</description>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+          <name>UNITY_VERSION</name>
+          <description>ビルドに利用するUnityのバージョンです</description>
+          <quoteValue>false</quoteValue>
+          <saveJSONParameterToFile>false</saveJSONParameterToFile>
+          <visibleItemCount>1</visibleItemCount>
+          <type>PT_SINGLE_SELECT</type>
+          <value>2022.3.25f1</value>
+          <defaultValue>2022.3.25f1</defaultValue>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+          <name>BUILD_KIND</name>
+          <description>クライアントのビルド種別</description>
+          <quoteValue>false</quoteValue>
+          <saveJSONParameterToFile>false</saveJSONParameterToFile>
+          <visibleItemCount>2</visibleItemCount>
+          <type>PT_SINGLE_SELECT</type>
+          <value>Dev,Release</value>
+          <defaultValue>Release</defaultValue>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+          <name>AssetKind</name>
+          <description>アセットの利用種別（Alpha,Test,Beta)</description>
+          <quoteValue>false</quoteValue>
+          <saveJSONParameterToFile>false</saveJSONParameterToFile>
+          <visibleItemCount>2</visibleItemCount>
+          <type>PT_SINGLE_SELECT</type>
+          <value>Dev,Release</value>
+          <defaultValue>Release</defaultValue>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+          <name>ANDROID_ARCHS</name>
+          <description>ARM64がデフォルト。 beta/本番は両方向け。</description>
+          <quoteValue>false</quoteValue>
+          <saveJSONParameterToFile>false</saveJSONParameterToFile>
+          <visibleItemCount>2</visibleItemCount>
+          <type>PT_SINGLE_SELECT</type>
+          <value>ARM64,ARMv7;ARM64</value>
+          <defaultValue>ARM64,ARMv7</defaultValue>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1311.vcf0a_900b_37c2">
+          <name>GIT_CREDENTIAL</name>
+          <defaultValue>bodacheng</defaultValue>
+          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
+          <required>true</required>
+        </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>APPCENTER_API_TOKEN</name>
+          <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
+          <defaultValue>a4ade3a5c777a6c30f2d931ae2a13517ac7c6c85</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>APPCENTER_API_TOKEN_RELEASE</name>
+          <defaultValue>0bc152403b102399b402b668215eb98fa1c89fce</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>buildAsset</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>developmentBuild</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CLEAR_CACHE</name>
+          <description>Libraryフォルダーを削除してビルド（注意：ビルド時間が１時間ほど増えます。）</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>needCleanWorkspace</name>
+          <description>ワークスペースのクリーン</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>INSTALL_POD</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@3894.3896.vca_2c931e7935">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.1">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>https://bodacheng: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@github.com/bodacheng/MCombat_tool.git</url>
+          <credentialsId>bodacheng</credentialsId>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/master</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="empty-list"/>
+      <extensions>
+        <hudson.plugins.git.extensions.impl.CloneOption>
+          <shallow>false</shallow>
+          <noTags>false</noTags>
+          <reference></reference>
+          <timeout>360</timeout>
+          <honorRefspec>false</honorRefspec>
+        </hudson.plugins.git.extensions.impl.CloneOption>
+      </extensions>
+    </scm>
+    <scriptPath>pipeline_script/DevBuild/ios/build.groovy</scriptPath>
+    <lightweight>false</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

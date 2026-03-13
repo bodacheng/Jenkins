@@ -1,0 +1,29 @@
+# OS artifacts
+.DS_Store
+
+# Jenkins runtime/cache directories
+/workspace/
+/tools/
+/cache/
+/caches/
+/logs/
+/fingerprints/
+/tmp/
+/war/
+/plugins/
+/updates/
+
+# Jenkins runtime metadata (re-generated on startup/runtime)
+/.lastStarted
+/.owner
+/queue.xml
+/queue.xml.bak
+/hudson.model.UpdateCenter.xml
+/jenkins.install.InstallUtil.lastExecVersion
+/jenkins.install.UpgradeWizard.state
+/jenkins.telemetry.Correlator.xml
+
+# Job runtime artifacts (keep job config.xml, ignore build history/counters)
+/jobs/**/builds/
+/jobs/**/nextBuildNumber
+/jobs/**/.DS_Store
