@@ -43,7 +43,7 @@
         </hudson.model.TextParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>208c6cf7-279d-4f0f-a513-59da2d2df456</uuid>
+          <uuid>11751837-f91b-4ddf-a78d-cd4dadd1c993</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git/</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
@@ -122,17 +122,6 @@
           <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
           <required>true</required>
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>APPCENTER_API_TOKEN</name>
-          <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
-          <defaultValue>68a003903bddc341ff5fc9c18429994f0c2c997c</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>APPCENTER_API_TOKEN_RELEASE</name>
-          <defaultValue>c403c952e5b4cc2a91a53e4baced2d17e3fa376e</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>buildAsset</name>
           <defaultValue>true</defaultValue>

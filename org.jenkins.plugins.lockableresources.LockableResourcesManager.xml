@@ -1,0 +1,7 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<org.jenkins.plugins.lockableresources.LockableResourcesManager plugin="lockable-resources@1469.v52dff5a_80e32">
+  <resources/>
+  <allowEmptyOrNullValues>false</allowEmptyOrNullValues>
+  <queuedContexts/>
+  <enableSave>1</enableSave>
+</org.jenkins.plugins.lockableresources.LockableResourcesManager>

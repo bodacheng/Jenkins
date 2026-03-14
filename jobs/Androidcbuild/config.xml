@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@1254.v3f64639b_11dd">
+<flow-definition plugin="workflow-job@1571.vb_423c255d6d9">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2118.v31fd5b_9944b_5"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2118.v31fd5b_9944b_5">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -13,7 +13,7 @@
   <displayName>CustomAndroidbuild</displayName>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.36.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.46.0">
       <projectUrl>https://github.com/bodacheng/MComat.git/</projectUrl>
       <displayName>Custom_Android_build</displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -26,6 +26,7 @@
         <numToKeep>60</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -40,15 +41,15 @@
           <defaultValue>https://github.com/bodacheng/MComat.git</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1214.v1de940103927">
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1491.v6d6145e96e1c">
           <name>GIT_CREDENTIAL</name>
           <defaultValue>bodacheng</defaultValue>
           <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
           <required>true</required>
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
-        <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.11">
+        <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>6c56c42f-28d6-4a4e-ab12-c60786a71656</uuid>
+          <uuid>f325cd28-ff97-4a2e-9db7-e6e9984ec41e</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
@@ -65,18 +66,18 @@
           <description>リリースノートです（appcenterに表示します）</description>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>UNITY_VERSION</name>
           <description>ビルドに利用するUnityのバージョンです</description>
           <quoteValue>false</quoteValue>
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
           <visibleItemCount>1</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
-          <value>2022.3.25f1</value>
+          <value>6000.3.11f1</value>
           <defaultValue>2022.3.25f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>BUILD_KIND</name>
           <description>クライアントのビルド種別</description>
           <quoteValue>false</quoteValue>
@@ -87,7 +88,7 @@
           <defaultValue>Dev</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>AssetKind</name>
           <description>アセットの利用種別（Alpha,Test,Beta)</description>
           <quoteValue>false</quoteValue>
@@ -98,7 +99,7 @@
           <defaultValue>Alpha</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>ANDROID_ARCHS</name>
           <description>ARM64がデフォルト。 beta/本番は両方向け。</description>
           <quoteValue>false</quoteValue>
@@ -109,17 +110,6 @@
           <defaultValue>ARM64</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>APPCENTER_API_TOKEN</name>
-          <description>AppCenter API TOKENを指定します（伏せ字にできるならしたほうがよいかもしれないが、パラメーター指定でみれそうなので・・・どうだろ）</description>
-          <defaultValue>0f0bcc5c5d786c5e255371fa776ae98e89e58bb4</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>APPCENTER_API_TOKEN_RELEASE</name>
-          <defaultValue>b182c9f711d62273d2e7f663671a7140416d2f05</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>buildAsset</name>
           <defaultValue>false</defaultValue>
@@ -138,11 +128,16 @@
           <description>ワークスペースのクリーン</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>GoogleCredentialsId</name>
+          <defaultValue>GemWarrior</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@3536.vb_8a_6628079d5">
-    <scm class="hudson.plugins.git.GitSCM" plugin="git@4.14.1">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.10.0">
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
