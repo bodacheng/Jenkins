@@ -39,6 +39,20 @@
     <excludeClientIPFromCrumb>false</excludeClientIPFromCrumb>
   </crumbIssuer>
   <nodeProperties/>
-  <globalNodeProperties/>
+  <globalNodeProperties>
+    <hudson.slaves.EnvironmentVariablesNodeProperty>
+      <envVars serialization="custom">
+        <unserializable-parents/>
+        <tree-map>
+          <default>
+            <comparator class="java.lang.String$CaseInsensitiveComparator"/>
+          </default>
+          <int>1</int>
+          <string>PATH</string>
+          <string>${PATH}:/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin</string>
+        </tree-map>
+      </envVars>
+    </hudson.slaves.EnvironmentVariablesNodeProperty>
+  </globalNodeProperties>
   <nodeRenameMigrationNeeded>false</nodeRenameMigrationNeeded>
 </hudson>

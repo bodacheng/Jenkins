@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@1508.v9cb_c3a_a_89dfd">
+<flow-definition plugin="workflow-job@1571.vb_423c255d6d9">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -33,10 +33,10 @@
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>GIT_URL</name>
-          <defaultValue>https://bodacheng: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@github.com/bodacheng/MComat.git/</defaultValue>
+          <defaultValue>https://github.com/bodacheng/MComat.git/</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1413.va_51c53703df1">
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1491.v6d6145e96e1c">
           <name>GIT_CREDENTIAL</name>
           <defaultValue>bodacheng</defaultValue>
           <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
@@ -44,8 +44,8 @@
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>d3f09e8f-0a62-4777-bca5-3a4dc0423e76</uuid>
-          <remoteURL>https://bodacheng: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@github.com/bodacheng/MComat.git/</remoteURL>
+          <uuid>c3ca15f6-4599-48b8-a034-8ca037fb6c69</uuid>
+          <remoteURL>https://github.com/bodacheng/MComat.git/</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
           <type>PT_BRANCH</type>
@@ -56,14 +56,14 @@
           <quickFilterEnabled>false</quickFilterEnabled>
           <listSize>5</listSize>
         </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@382.v5697b_32134e8">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>UNITY_VERSION</name>
           <description>Unityバージョン</description>
           <quoteValue>false</quoteValue>
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
           <visibleItemCount>2</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
-          <value>6000.0.58f2</value>
+          <value>6000.3.11f1</value>
           <defaultValue>6000.0.46f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
@@ -82,7 +82,7 @@
           <description>Libraryフォルダーを削除してビルド（注意：ビルド時間が１時間ほど増えます。）</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@382.v5697b_32134e8">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>AssetKind</name>
           <description>ビルド種別（Dev/Release)</description>
           <quoteValue>false</quoteValue>
@@ -102,12 +102,12 @@
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.DisableResumeJobProperty/>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@4080.va_15b_44a_91525">
-    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.7.0">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.10.0">
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>https://bodacheng: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@github.com/bodacheng/MCombat_tool.git</url>
+          <url>https://github.com/bodacheng/MCombat_tool.git</url>
           <credentialsId>bodacheng</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>

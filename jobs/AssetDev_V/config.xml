@@ -27,7 +27,7 @@
       <parameterDefinitions>
         <hudson.model.TextParameterDefinition>
           <name>GIT_URL</name>
-          <defaultValue>https://bodacheng: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@github.com/bodacheng/PocketStriker.git/</defaultValue>
+          <defaultValue>https://github.com/bodacheng/PocketStriker.git/</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1311.vcf0a_900b_37c2">
@@ -101,7 +101,7 @@
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>https://bodacheng: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@github.com/bodacheng/MCombat_tool.git</url>
+          <url>https://github.com/bodacheng/MCombat_tool.git</url>
           <credentialsId>bodacheng</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
