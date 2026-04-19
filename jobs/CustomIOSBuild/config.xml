@@ -43,7 +43,7 @@
         </hudson.model.TextParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>11751837-f91b-4ddf-a78d-cd4dadd1c993</uuid>
+          <uuid>09e94fac-343e-41db-abf6-f9dbf68bd5f5</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git/</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
@@ -79,7 +79,7 @@
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
           <visibleItemCount>1</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
-          <value>6000.3.11f1</value>
+          <value>6000.4.0f1</value>
           <defaultValue>6000.0.46f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>

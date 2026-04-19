@@ -44,7 +44,7 @@
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>c3ca15f6-4599-48b8-a034-8ca037fb6c69</uuid>
+          <uuid>a3291340-16f4-4d7a-afc8-4c14e18f4dd3</uuid>
           <remoteURL>https://github.com/bodacheng/MComat.git/</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
@@ -63,7 +63,7 @@
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
           <visibleItemCount>2</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
-          <value>6000.3.11f1</value>
+          <value>6000.4.0f1</value>
           <defaultValue>6000.0.46f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
