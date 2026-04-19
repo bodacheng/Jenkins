@@ -71,8 +71,8 @@
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
           <visibleItemCount>1</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
-          <value>2022.3.25f1</value>
-          <defaultValue>2022.3.25f1</defaultValue>
+          <value>6000.4.0f1</value>
+          <defaultValue>6000.4.0f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
         <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">

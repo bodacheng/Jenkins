@@ -13,7 +13,7 @@
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.38.0">
-      <projectUrl>https://bodacheng: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@github.com/bodacheng/PocketStriker.git/</projectUrl>
+      <projectUrl>https://github.com/bodacheng/PocketStriker.git/</projectUrl>
       <displayName>Custom_IOS_build_v</displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -51,7 +51,7 @@
         <hudson.model.TextParameterDefinition>
           <name>GIT_URL</name>
           <description>这个项目配置里填写了多次项目地址，但是我们没找到什么方式把这个给简化。</description>
-          <defaultValue>https://bodacheng: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@github.com/bodacheng/PocketStriker.git</defaultValue>
+          <defaultValue>https://github.com/bodacheng/PocketStriker.git</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
@@ -72,8 +72,8 @@
           <saveJSONParameterToFile>false</saveJSONParameterToFile>
           <visibleItemCount>1</visibleItemCount>
           <type>PT_SINGLE_SELECT</type>
-          <value>2022.3.25f1</value>
-          <defaultValue>2022.3.25f1</defaultValue>
+          <value>6000.4.0f1</value>
+          <defaultValue>6000.4.0f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
         <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
@@ -156,7 +156,7 @@
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>https://bodacheng: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@github.com/bodacheng/MCombat_tool.git</url>
+          <url>https://github.com/bodacheng/MCombat_tool.git</url>
           <credentialsId>bodacheng</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
