@@ -1,0 +1,353 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1571.vb_423c255d6d9">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1">
+      <jobProperties>
+        <string>org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty</string>
+        <string>jenkins.model.BuildDiscarderProperty</string>
+      </jobProperties>
+      <triggers/>
+      <parameters>
+        <string>BRANCH</string>
+        <string>CLEAN_WORKSPACE</string>
+        <string>CLEAN_LIBRARY</string>
+        <string>APP_VERSION</string>
+        <string>UPLOAD_APP_STORE</string>
+      </parameters>
+      <options>
+        <string>skipDefaultCheckout</string>
+      </options>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>FXTrade iOS App Store Connect build. Uses the same signing credentials as CustomIOSBuild and does not run an Asset Build.</description>
+  <displayName>FXTradeIOSBuild</displayName>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.46.0">
+      <projectUrl>https://github.com/bodacheng/FXTrade.git/</projectUrl>
+      <displayName>FXTrade iOS build</displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Git branch to build.</description>
+          <defaultValue>main</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>APP_VERSION</name>
+          <description>CFBundleShortVersionString.</description>
+          <defaultValue>1.0</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CLEAN_LIBRARY</name>
+          <description>Delete the Unity Library cache before building.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CLEAN_WORKSPACE</name>
+          <description>Delete the Jenkins workspace before checkout.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>UPLOAD_APP_STORE</name>
+          <description>Validate and upload the IPA to App Store Connect.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <script>
+String normalizeBranchSpec(String branch)
+{
+    String value = branch?.trim()
+    if (!value)
+    {
+        return &apos;main&apos;
+    }
+
+    return value.replace(&apos;refs/heads/&apos;, &apos;&apos;).replace(&apos;origin/&apos;, &apos;&apos;).replace(&apos;*/&apos;, &apos;&apos;)
+}
+
+String exportOptionsPlist()
+{
+    return &apos;&apos;&apos;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;
+&lt;plist version=&quot;1.0&quot;&gt;
+&lt;dict&gt;
+    &lt;key&gt;destination&lt;/key&gt;
+    &lt;string&gt;export&lt;/string&gt;
+    &lt;key&gt;method&lt;/key&gt;
+    &lt;string&gt;app-store-connect&lt;/string&gt;
+    &lt;key&gt;signingStyle&lt;/key&gt;
+    &lt;string&gt;automatic&lt;/string&gt;
+    &lt;key&gt;teamID&lt;/key&gt;
+    &lt;string&gt;S88E744TXJ&lt;/string&gt;
+    &lt;key&gt;stripSwiftSymbols&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;manageAppVersionAndBuildNumber&lt;/key&gt;
+    &lt;false/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+&apos;&apos;&apos;
+}
+
+pipeline {
+    agent any
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: &apos;10&apos;))
+        timeout(time: 240, unit: &apos;MINUTES&apos;)
+        timestamps()
+    }
+
+    parameters {
+        string(name: &apos;BRANCH&apos;, defaultValue: &apos;main&apos;, description: &apos;Git branch to build.&apos;)
+        string(name: &apos;APP_VERSION&apos;, defaultValue: &apos;1.0&apos;, description: &apos;CFBundleShortVersionString.&apos;)
+        booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Delete the Unity Library cache before building.&apos;)
+        booleanParam(name: &apos;CLEAN_WORKSPACE&apos;, defaultValue: false, description: &apos;Delete the Jenkins workspace before checkout.&apos;)
+        booleanParam(name: &apos;UPLOAD_APP_STORE&apos;, defaultValue: true, description: &apos;Validate and upload the IPA to App Store Connect.&apos;)
+    }
+
+    environment {
+        GIT_URL = &apos;https://github.com/bodacheng/FXTrade.git&apos;
+        GIT_CREDENTIALS_ID = &apos;bodacheng&apos;
+        UNITY_BUILD_METHOD = &apos;TestFXTrade.Editor.Build.JenkinsIOSBuild.BuildIOS&apos;
+        APPLE_TEAM_ID = &apos;S88E744TXJ&apos;
+        APP_BUNDLE_ID = &apos;com.BO.TestFXTrade&apos;
+        XCODE_OUTPUT_PATH = &apos;build_ios/Export&apos;
+        ARCHIVE_PATH = &apos;build_ios/Archive/FXTrade.xcarchive&apos;
+        IPA_OUTPUT_PATH = &apos;build_ios/Ipa&apos;
+        DERIVED_DATA_PATH = &apos;build_ios/DerivedData&apos;
+        EXPORT_OPTIONS_PATH = &apos;build_ios/Export/ExportOptions.plist&apos;
+    }
+
+    stages {
+        stage(&apos;Clean Workspace&apos;) {
+            when {
+                expression { return params.CLEAN_WORKSPACE }
+            }
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage(&apos;Checkout&apos;) {
+            steps {
+                script {
+                    String branch = normalizeBranchSpec(params.BRANCH?.toString())
+                    checkout([
+                        $class: &apos;GitSCM&apos;,
+                        branches: [[name: branch]],
+                        extensions: [
+                            [$class: &apos;CloneOption&apos;, timeout: 360],
+                            [$class: &apos;CheckoutOption&apos;, timeout: 360]
+                        ],
+                        userRemoteConfigs: [[
+                            credentialsId: env.GIT_CREDENTIALS_ID,
+                            url: env.GIT_URL
+                        ]]
+                    ])
+
+                    String gitHash = sh(script: &apos;git rev-parse --short=8 HEAD&apos;, returnStdout: true).trim()
+                    currentBuild.description = &quot;Version: ${params.APP_VERSION}\nBranch: ${branch}\nGit: ${gitHash}&quot;
+                }
+            }
+        }
+
+        stage(&apos;Prepare&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+if [[ ! &quot;$APP_VERSION&quot; =~ ^[0-9]+([.][0-9]+){0,2}$ ]]; then
+    echo &quot;APP_VERSION must contain one to three numeric components: $APP_VERSION&quot; &gt;&amp;2
+    exit 2
+fi
+
+if [ &quot;$CLEAN_LIBRARY&quot; = &quot;true&quot; ]; then
+    rm -rf Library
+fi
+
+rm -rf &quot;$XCODE_OUTPUT_PATH&quot; &quot;$ARCHIVE_PATH&quot; &quot;$IPA_OUTPUT_PATH&quot; &quot;$DERIVED_DATA_PATH&quot;
+mkdir -p Logs/Jenkins &quot;$XCODE_OUTPUT_PATH&quot; &quot;$(dirname &quot;$ARCHIVE_PATH&quot;)&quot; &quot;$IPA_OUTPUT_PATH&quot; &quot;$DERIVED_DATA_PATH&quot;
+
+UNITY_VERSION=&quot;$(awk &apos;$1 == &quot;m_EditorVersion:&quot; { print $2; exit }&apos; ProjectSettings/ProjectVersion.txt)&quot;
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+if [ -z &quot;$UNITY_VERSION&quot; ] || [ ! -x &quot;$UNITY_EXECUTABLE&quot; ]; then
+    echo &quot;Unity executable not found for ProjectSettings/ProjectVersion.txt: $UNITY_EXECUTABLE&quot; &gt;&amp;2
+    exit 3
+fi
+
+echo &quot;Unity $UNITY_VERSION&quot;
+xcodebuild -version
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Unity Export&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+UNITY_VERSION=&quot;$(awk &apos;$1 == &quot;m_EditorVersion:&quot; { print $2; exit }&apos; ProjectSettings/ProjectVersion.txt)&quot;
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+
+&quot;$UNITY_EXECUTABLE&quot; \
+  -projectPath &quot;$WORKSPACE&quot; \
+  -quit \
+  -batchmode \
+  -nographics \
+  -executeMethod &quot;$UNITY_BUILD_METHOD&quot; \
+  -logFile &quot;$WORKSPACE/Logs/Jenkins/build_${BUILD_NUMBER}_log.txt&quot; \
+  -buildTarget iOS \
+  -OutputPath &quot;$XCODE_OUTPUT_PATH&quot; \
+  -buildNumber &quot;$BUILD_NUMBER&quot; \
+  -bundleVersion &quot;$APP_VERSION&quot; \
+  -productName TestFXTrade \
+  -bundleIdentifier &quot;$APP_BUNDLE_ID&quot; \
+  -appleTeamId &quot;$APPLE_TEAM_ID&quot; \
+  -automaticSigning true \
+  -provisioningProfileType Distribution
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Unlock Keychain&apos;) {
+            steps {
+                withCredentials([string(credentialsId: &apos;PCUSER_PASSWORD&apos;, variable: &apos;KEYCHAIN_PASSWORD&apos;)]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+KEYCHAIN=&quot;$HOME/Library/Keychains/login.keychain-db&quot;
+security unlock-keychain -p &quot;$KEYCHAIN_PASSWORD&quot; &quot;$KEYCHAIN&quot;
+security set-keychain-settings -lut 21600 &quot;$KEYCHAIN&quot;
+&apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Xcode Archive&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+cd &quot;$XCODE_OUTPUT_PATH&quot;
+if [ -d &quot;Unity-iPhone.xcworkspace&quot; ]; then
+    CONTAINER_ARGS=( -workspace &quot;Unity-iPhone.xcworkspace&quot; )
+elif [ -d &quot;Unity-iPhone.xcodeproj&quot; ]; then
+    CONTAINER_ARGS=( -project &quot;Unity-iPhone.xcodeproj&quot; )
+else
+    echo &quot;Unity-iPhone.xcodeproj/xcworkspace was not generated in $XCODE_OUTPUT_PATH&quot; &gt;&amp;2
+    exit 4
+fi
+
+xcodebuild &quot;${CONTAINER_ARGS[@]}&quot; \
+  -allowProvisioningUpdates \
+  -scheme Unity-iPhone \
+  -configuration Release \
+  -destination &apos;generic/platform=iOS&apos; \
+  -archivePath &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+  -derivedDataPath &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot; \
+  archive \
+  CODE_SIGN_STYLE=Automatic \
+  DEVELOPMENT_TEAM=&quot;$APPLE_TEAM_ID&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Export IPA&apos;) {
+            steps {
+                script {
+                    writeFile(file: env.EXPORT_OPTIONS_PATH, text: exportOptionsPlist())
+                }
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+xcodebuild -exportArchive \
+  -allowProvisioningUpdates \
+  -archivePath &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+  -exportPath &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; \
+  -exportOptionsPlist &quot;$WORKSPACE/$EXPORT_OPTIONS_PATH&quot;
+
+IPA_FILE=&quot;$(find &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; -maxdepth 1 -type f -name &apos;*.ipa&apos; -print -quit)&quot;
+if [ -z &quot;$IPA_FILE&quot; ]; then
+    echo &quot;IPA was not generated under $WORKSPACE/$IPA_OUTPUT_PATH&quot; &gt;&amp;2
+    exit 5
+fi
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Archive IPA&apos;) {
+            steps {
+                archiveArtifacts(
+                    artifacts: &apos;build_ios/Ipa/*.ipa&apos;,
+                    fingerprint: true,
+                    followSymlinks: false
+                )
+            }
+        }
+
+        stage(&apos;Upload App Store&apos;) {
+            when {
+                expression { return params.UPLOAD_APP_STORE }
+            }
+            steps {
+                withCredentials([
+                    string(credentialsId: &apos;AppleStore_API_Key&apos;, variable: &apos;API_KEY&apos;),
+                    string(credentialsId: &apos;AppleStore_API_Issuer&apos;, variable: &apos;API_ISSUER&apos;)
+                ]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+PRIVATE_KEY=&quot;$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY}.p8&quot;
+if [ ! -f &quot;$PRIVATE_KEY&quot; ]; then
+    echo &quot;The shared App Store Connect private key is not installed at ~/.appstoreconnect/private_keys.&quot; &gt;&amp;2
+    exit 6
+fi
+
+IPA_FILE=&quot;$(find &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; -maxdepth 1 -type f -name &apos;*.ipa&apos; -print -quit)&quot;
+xcrun altool --validate-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KEY&quot; --apiIssuer &quot;$API_ISSUER&quot; --verbose
+xcrun altool --upload-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KEY&quot; --apiIssuer &quot;$API_ISSUER&quot; --verbose
+&apos;&apos;&apos;
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts(
+                allowEmptyArchive: true,
+                artifacts: &quot;Logs/Jenkins/build_${env.BUILD_NUMBER}_log.txt, build_ios/Export/ExportOptions.plist&quot;,
+                fingerprint: true,
+                followSymlinks: false
+            )
+        }
+    }
+}
+</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

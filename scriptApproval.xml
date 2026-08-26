@@ -1,6 +1,13 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <scriptApproval plugin="script-security@1399.ve6a_66547f6e1">
-  <approvedScriptHashes/>
+  <approvedScriptHashes>
+    <string>SHA512:45a56d674ebebdf1e8bf1224c3cb1c6f8522341768346c76ec1ab06fbe612f3e68065e1795f56c114abb6b7c29cf2eea4baa57f4419e9ed639eea23240862f63</string>
+    <string>SHA512:52e40d9f051fe1d6a4cd06dc75ff0f7baf70bb1022d95d84bc0302dbad458118e3270d4b50cb6c133ba21d1ae1942e03a497c09a8cd0a8b49b926a1bc3107680</string>
+    <string>SHA512:8cbf82aed2771b9474a1c96596d1f56ab0dbfeccb24a4a2070d9317667f62165c2897dac9a4638593176976a9cbf060c5d9b47125060698954004b40a201d711</string>
+    <string>SHA512:c7f25762c4ef4c7ecc5f19d2a4c8469d556e7bd86160ed49209efbc2639bb2d0c45144fc3d6ff1ec4ea083026431af6a7e9d4c49871daabed9b7f58fe5bdaaec</string>
+    <string>SHA512:cda94a58ef2d9dcb01bff0d1e2a28eccde9e25b82bb161a005d48ef998490a0dbe7e93aaf0d3903d84de4bb75322e2481707cdc26831b5a8c261622df4271ed5</string>
+    <string>SHA512:d38b015f35a66bbe6a09c3489507e0a67f329681d586ac1742a6363f1f4851b35cba970c83c9817bdff355f48e836c91c8e4cf2099c2f42c197d643048caa530</string>
+  </approvedScriptHashes>
   <approvedSignatures/>
   <aclApprovedSignatures/>
   <approvedClasspathEntries/>

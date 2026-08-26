@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@1385.vb_58b_86ea_fff1">
+<flow-definition plugin="workflow-job@1571.vb_423c255d6d9">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2168.vf921b_4e72c73"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2168.vf921b_4e72c73">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -12,7 +12,7 @@
   <description>iOSカスタムビルド</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.38.0">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.46.0">
       <projectUrl>https://github.com/bodacheng/PocketStriker.git/</projectUrl>
       <displayName>Custom_IOS_build_v</displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -25,6 +25,7 @@
         <numToKeep>10</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -36,7 +37,7 @@
         </hudson.model.TextParameterDefinition>
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter@0.0.13">
           <name>BRANCH</name>
-          <uuid>37fdffa7-0c64-4017-a49b-6b23cd84345d</uuid>
+          <uuid>b65515b6-d66c-43b9-b31d-dfb4423bdf46</uuid>
           <remoteURL>https://github.com/bodacheng/PocketStriker.git</remoteURL>
           <credentialsId>bodacheng</credentialsId>
           <defaultValue></defaultValue>
@@ -65,7 +66,7 @@
           <description>リリースノートです（appcenterに表示します）</description>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>UNITY_VERSION</name>
           <description>ビルドに利用するUnityのバージョンです</description>
           <quoteValue>false</quoteValue>
@@ -76,7 +77,7 @@
           <defaultValue>6000.4.0f1</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>BUILD_KIND</name>
           <description>クライアントのビルド種別</description>
           <quoteValue>false</quoteValue>
@@ -87,7 +88,7 @@
           <defaultValue>Release</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>AssetKind</name>
           <description>アセットの利用種別（Alpha,Test,Beta)</description>
           <quoteValue>false</quoteValue>
@@ -98,7 +99,7 @@
           <defaultValue>Release</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@376.v2e02857547b_a_">
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>ANDROID_ARCHS</name>
           <description>ARM64がデフォルト。 beta/本番は両方向け。</description>
           <quoteValue>false</quoteValue>
@@ -109,7 +110,7 @@
           <defaultValue>ARM64,ARMv7</defaultValue>
           <multiSelectDelimiter>,</multiSelectDelimiter>
         </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
-        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1311.vcf0a_900b_37c2">
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@1491.v6d6145e96e1c">
           <name>GIT_CREDENTIAL</name>
           <defaultValue>bodacheng</defaultValue>
           <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
@@ -151,8 +152,8 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@3894.3896.vca_2c931e7935">
-    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.1">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.10.0">
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
