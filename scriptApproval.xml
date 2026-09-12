@@ -12,7 +12,243 @@
   <aclApprovedSignatures/>
   <approvedClasspathEntries/>
   <forceSandbox>false</forceSandbox>
-  <pendingScripts/>
+  <pendingScripts>
+    <pendingScript>
+      <context>
+        <user>bodacheng</user>
+        <item>HEADSLING-iOS-AppStore</item>
+        <key>HEADSLING-iOS-AppStore</key>
+      </context>
+      <script>String exportOptionsPlist()
+{
+    return &apos;&apos;&apos;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;
+&lt;plist version=&quot;1.0&quot;&gt;
+&lt;dict&gt;
+    &lt;key&gt;destination&lt;/key&gt;
+    &lt;string&gt;export&lt;/string&gt;
+    &lt;key&gt;method&lt;/key&gt;
+    &lt;string&gt;app-store-connect&lt;/string&gt;
+    &lt;key&gt;signingStyle&lt;/key&gt;
+    &lt;string&gt;automatic&lt;/string&gt;
+    &lt;key&gt;teamID&lt;/key&gt;
+    &lt;string&gt;S88E744TXJ&lt;/string&gt;
+    &lt;key&gt;stripSwiftSymbols&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;manageAppVersionAndBuildNumber&lt;/key&gt;
+    &lt;false/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+&apos;&apos;&apos;
+}
+
+pipeline {
+    agent {
+        node {
+            customWorkspace &apos;/Users/daisei/HeadGame&apos;
+        }
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: &apos;10&apos;))
+        timeout(time: 240, unit: &apos;MINUTES&apos;)
+        timestamps()
+    }
+
+    parameters {
+        string(name: &apos;APP_VERSION&apos;, defaultValue: &apos;0.7.0&apos;, description: &apos;App Store version (CFBundleShortVersionString).&apos;)
+        booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Delete the Unity Library cache before building.&apos;)
+        booleanParam(name: &apos;UPLOAD_APP_STORE&apos;, defaultValue: true, description: &apos;Validate and upload the IPA to App Store Connect.&apos;)
+    }
+
+    environment {
+        UNITY_BUILD_METHOD = &apos;HeadSling.Editor.HeadSlingMobileBuilder.BuildIOS&apos;
+        APPLE_TEAM_ID = &apos;S88E744TXJ&apos;
+        APP_BUNDLE_ID = &apos;com.headsling.prototype&apos;
+        XCODE_OUTPUT_PATH = &apos;Builds/iOS&apos;
+        ARCHIVE_PATH = &apos;Builds/iOSArchive/HEADSLING.xcarchive&apos;
+        IPA_OUTPUT_PATH = &apos;Builds/iOSIPA&apos;
+        DERIVED_DATA_PATH = &apos;Builds/iOSDerivedData&apos;
+        EXPORT_OPTIONS_PATH = &apos;Builds/iOSExportOptions.plist&apos;
+    }
+
+    stages {
+        stage(&apos;Preflight&apos;) {
+            steps {
+                script {
+                    if (!(params.APP_VERSION ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
+                        error(&quot;APP_VERSION must contain one to three numeric components: ${params.APP_VERSION}&quot;)
+                    }
+                    currentBuild.description = &quot;Version: ${params.APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nBundle: ${env.APP_BUNDLE_ID}&quot;
+                }
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+UNITY_VERSION=&quot;$(awk &apos;$1 == &quot;m_EditorVersion:&quot; { print $2; exit }&apos; ProjectSettings/ProjectVersion.txt)&quot;
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+if [ -z &quot;$UNITY_VERSION&quot; ] || [ ! -x &quot;$UNITY_EXECUTABLE&quot; ]; then
+    echo &quot;Unity executable not found: $UNITY_EXECUTABLE&quot; &gt;&amp;2
+    exit 2
+fi
+
+if [ &quot;$CLEAN_LIBRARY&quot; = &quot;true&quot; ]; then
+    rm -rf &quot;$WORKSPACE/Library&quot;
+fi
+
+rm -rf &quot;$WORKSPACE/$XCODE_OUTPUT_PATH&quot; &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+       &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot;
+mkdir -p &quot;$WORKSPACE/Logs/Jenkins&quot; &quot;$WORKSPACE/$(dirname &quot;$ARCHIVE_PATH&quot;)&quot; \
+         &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot;
+
+echo &quot;Unity $UNITY_VERSION&quot;
+xcodebuild -version
+security find-identity -v -p codesigning
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Unity Export&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+UNITY_VERSION=&quot;$(awk &apos;$1 == &quot;m_EditorVersion:&quot; { print $2; exit }&apos; ProjectSettings/ProjectVersion.txt)&quot;
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+
+HEADSLING_BUNDLE_ID=&quot;$APP_BUNDLE_ID&quot; \
+HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
+HEADSLING_BUILD_NUMBER=&quot;$BUILD_NUMBER&quot; \
+&quot;$UNITY_EXECUTABLE&quot; \
+  -projectPath &quot;$WORKSPACE&quot; \
+  -quit \
+  -batchmode \
+  -nographics \
+  -buildTarget iOS \
+  -executeMethod &quot;$UNITY_BUILD_METHOD&quot; \
+  -logFile &quot;$WORKSPACE/Logs/Jenkins/ios_${BUILD_NUMBER}.log&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Unlock Keychain&apos;) {
+            steps {
+                withCredentials([string(credentialsId: &apos;PCUSER_PASSWORD&apos;, variable: &apos;KEYCHAIN_PASSWORD&apos;)]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+KEYCHAIN=&quot;$HOME/Library/Keychains/login.keychain-db&quot;
+security unlock-keychain -p &quot;$KEYCHAIN_PASSWORD&quot; &quot;$KEYCHAIN&quot;
+security set-keychain-settings -lut 21600 &quot;$KEYCHAIN&quot;
+&apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Xcode Archive&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+cd &quot;$WORKSPACE/$XCODE_OUTPUT_PATH&quot;
+if [ -d &quot;Unity-iPhone.xcworkspace&quot; ]; then
+    CONTAINER_ARGS=( -workspace &quot;Unity-iPhone.xcworkspace&quot; )
+elif [ -d &quot;Unity-iPhone.xcodeproj&quot; ]; then
+    CONTAINER_ARGS=( -project &quot;Unity-iPhone.xcodeproj&quot; )
+else
+    echo &quot;Unity-iPhone Xcode project was not generated.&quot; &gt;&amp;2
+    exit 3
+fi
+
+xcodebuild &quot;${CONTAINER_ARGS[@]}&quot; \
+  -allowProvisioningUpdates \
+  -scheme Unity-iPhone \
+  -configuration Release \
+  -destination &apos;generic/platform=iOS&apos; \
+  -archivePath &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+  -derivedDataPath &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot; \
+  archive \
+  CODE_SIGN_STYLE=Automatic \
+  DEVELOPMENT_TEAM=&quot;$APPLE_TEAM_ID&quot; \
+  PRODUCT_BUNDLE_IDENTIFIER=&quot;$APP_BUNDLE_ID&quot; \
+  MARKETING_VERSION=&quot;$APP_VERSION&quot; \
+  CURRENT_PROJECT_VERSION=&quot;$BUILD_NUMBER&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Export IPA&apos;) {
+            steps {
+                script {
+                    writeFile(file: env.EXPORT_OPTIONS_PATH, text: exportOptionsPlist())
+                }
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+xcodebuild -exportArchive \
+  -allowProvisioningUpdates \
+  -archivePath &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+  -exportPath &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; \
+  -exportOptionsPlist &quot;$WORKSPACE/$EXPORT_OPTIONS_PATH&quot;
+
+IPA_FILE=&quot;$(find &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; -maxdepth 1 -type f -name &apos;*.ipa&apos; -print -quit)&quot;
+test -n &quot;$IPA_FILE&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Archive IPA&apos;) {
+            steps {
+                archiveArtifacts(
+                    artifacts: &apos;Builds/iOSIPA/*.ipa&apos;,
+                    fingerprint: true,
+                    followSymlinks: false
+                )
+            }
+        }
+
+        stage(&apos;Upload App Store&apos;) {
+            when {
+                expression { return params.UPLOAD_APP_STORE }
+            }
+            steps {
+                withCredentials([
+                    string(credentialsId: &apos;AppleStore_API_Key&apos;, variable: &apos;API_KEY&apos;),
+                    string(credentialsId: &apos;AppleStore_API_Issuer&apos;, variable: &apos;API_ISSUER&apos;)
+                ]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+PRIVATE_KEY=&quot;$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY}.p8&quot;
+if [ ! -f &quot;$PRIVATE_KEY&quot; ]; then
+    echo &quot;App Store Connect private key is missing: ~/.appstoreconnect/private_keys/AuthKey_&lt;key-id&gt;.p8&quot; &gt;&amp;2
+    exit 4
+fi
+
+IPA_FILE=&quot;$(find &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; -maxdepth 1 -type f -name &apos;*.ipa&apos; -print -quit)&quot;
+xcrun altool --validate-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KEY&quot; --apiIssuer &quot;$API_ISSUER&quot;
+xcrun altool --upload-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KEY&quot; --apiIssuer &quot;$API_ISSUER&quot;
+&apos;&apos;&apos;
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts(
+                allowEmptyArchive: true,
+                artifacts: &quot;Logs/Jenkins/ios_${env.BUILD_NUMBER}.log, Builds/iOSExportOptions.plist, Builds/iOSIPA/*.ipa&quot;,
+                fingerprint: true,
+                followSymlinks: false
+            )
+        }
+    }
+}
+</script>
+      <language>groovy</language>
+    </pendingScript>
+  </pendingScripts>
   <pendingSignatures>
     <pendingSignature>
       <context/>
