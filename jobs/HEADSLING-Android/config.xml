@@ -10,17 +10,19 @@
       <triggers/>
       <parameters>
         <string>BRANCH</string>
+        <string>ARTIFACT_FORMAT</string>
+        <string>SIGNING</string>
         <string>UNITY_VERSION</string>
+        <string>VERSION_CODE</string>
         <string>CLEAN_LIBRARY</string>
         <string>APP_VERSION</string>
-        <string>UPLOAD_APP_STORE</string>
       </parameters>
       <options>
         <string>skipDefaultCheckout</string>
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING iOS：独立 Addressables 构建与包内资源校验，使用最新发布描述文件和本机证书导出 IPA。Pipeline 分支：codex/mobile-pipelines。</description>
+  <description>HEADSLING Android：独立 Addressables 构建与包内资源校验，支持 APK / AAB、Debug / Release 签名。Pipeline 分支：codex/mobile-pipelines。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -40,7 +42,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>27798354-c7e2-417b-9f93-cf37ae5b2146</uuid>
+          <uuid>a83505c5-c746-4047-a15c-794c1b21a0f5</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
@@ -61,19 +63,35 @@
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>APP_VERSION</name>
-          <description>App Store version (CFBundleShortVersionString).</description>
+          <description>Android versionName.</description>
           <defaultValue>1.0</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>VERSION_CODE</name>
+          <description>Positive Android versionCode; blank uses Jenkins BUILD_NUMBER.</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ARTIFACT_FORMAT</name>
+          <description>APK for installation; AAB for Google Play.</description>
+          <choices>
+            <string>APK</string>
+            <string>AAB</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SIGNING</name>
+          <description>Release uses HEADSLING Android credentials in Jenkins.</description>
+          <choices>
+            <string>Debug</string>
+            <string>Release</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>CLEAN_LIBRARY</name>
           <description>Delete the Unity Library cache before building.</description>
           <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>UPLOAD_APP_STORE</name>
-          <description>Validate and upload the IPA to App Store Connect.</description>
-          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -96,7 +114,7 @@
       <submoduleCfg class="empty-list"/>
       <extensions/>
     </scm>
-    <scriptPath>Jenkinsfile.ios</scriptPath>
+    <scriptPath>Jenkinsfile.android</scriptPath>
     <lightweight>true</lightweight>
   </definition>
   <triggers/>
