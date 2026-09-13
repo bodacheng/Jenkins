@@ -22,7 +22,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING Android：独立 Addressables 构建与包内资源校验，支持 APK / AAB、Debug / Release 签名。Pipeline 分支：codex/mobile-pipelines。</description>
+  <description>HEADSLING Android：独立 Addressables 构建与包内资源校验，支持 APK / AAB、Debug / Release 签名。Pipeline 与默认构建分支：main。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -42,12 +42,12 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>a83505c5-c746-4047-a15c-794c1b21a0f5</uuid>
+          <uuid>73db57db-7358-41ea-bff9-5f40660c1a9f</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
           <sortMode>ASCENDING_SMART</sortMode>
-          <defaultValue>codex/mobile-pipelines</defaultValue>
+          <defaultValue>main</defaultValue>
           <selectedValue>DEFAULT</selectedValue>
           <useRepository>https://github.com/bodacheng/HeadGame.git</useRepository>
           <quickFilterEnabled>true</quickFilterEnabled>
@@ -107,7 +107,7 @@
       </userRemoteConfigs>
       <branches>
         <hudson.plugins.git.BranchSpec>
-          <name>*/codex/mobile-pipelines</name>
+          <name>*/main</name>
         </hudson.plugins.git.BranchSpec>
       </branches>
       <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>

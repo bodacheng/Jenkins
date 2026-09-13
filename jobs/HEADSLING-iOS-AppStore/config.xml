@@ -20,7 +20,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING iOS：独立 Addressables 构建与包内资源校验，使用最新发布描述文件和本机证书导出 IPA。Pipeline 分支：codex/mobile-pipelines。</description>
+  <description>HEADSLING iOS：独立 Addressables 构建与包内资源校验，使用最新发布描述文件和本机证书导出 IPA。Pipeline 与默认构建分支：main。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -40,12 +40,12 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>27798354-c7e2-417b-9f93-cf37ae5b2146</uuid>
+          <uuid>37e98214-b1ce-4f04-8b03-bb427d7d18ee</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
           <sortMode>ASCENDING_SMART</sortMode>
-          <defaultValue>codex/mobile-pipelines</defaultValue>
+          <defaultValue>main</defaultValue>
           <selectedValue>DEFAULT</selectedValue>
           <useRepository>https://github.com/bodacheng/HeadGame.git</useRepository>
           <quickFilterEnabled>true</quickFilterEnabled>
@@ -89,7 +89,7 @@
       </userRemoteConfigs>
       <branches>
         <hudson.plugins.git.BranchSpec>
-          <name>*/codex/mobile-pipelines</name>
+          <name>*/main</name>
         </hudson.plugins.git.BranchSpec>
       </branches>
       <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
