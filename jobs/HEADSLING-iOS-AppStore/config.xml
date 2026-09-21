@@ -40,7 +40,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>37e98214-b1ce-4f04-8b03-bb427d7d18ee</uuid>
+          <uuid>cb24cd3a-40c2-492c-b142-fa82dd2a8f7a</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
