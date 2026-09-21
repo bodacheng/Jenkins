@@ -42,7 +42,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>73db57db-7358-41ea-bff9-5f40660c1a9f</uuid>
+          <uuid>db55ff87-4108-48e5-84ad-e20a2fb8be1f</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
@@ -74,7 +74,7 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>ARTIFACT_FORMAT</name>
-          <description>APK for installation; AAB for Google Play.</description>
+          <description>APK for direct installation; AAB for bundle validation or Google Play.</description>
           <choices>
             <string>APK</string>
             <string>AAB</string>
@@ -82,7 +82,7 @@
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>SIGNING</name>
-          <description>Release uses HEADSLING Android credentials in Jenkins.</description>
+          <description>Debug supports test APK/AAB builds; Google Play uploads must use Release.</description>
           <choices>
             <string>Debug</string>
             <string>Release</string>
