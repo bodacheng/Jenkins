@@ -89,6 +89,16 @@
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>UPLOAD_GOOGLE_PLAY</name>
+          <description>Upload a Release AAB to the Google Play internal testing track as a draft release.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>GOOGLE_PLAY_RELEASE_NOTES</name>
+          <description>Optional zh-CN release notes (maximum 500 characters). A build-specific default is used when blank.</description>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>CLEAN_LIBRARY</name>
           <description>Delete the Unity Library cache before building.</description>
           <defaultValue>false</defaultValue>
