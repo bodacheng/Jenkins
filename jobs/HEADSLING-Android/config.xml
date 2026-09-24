@@ -13,6 +13,8 @@
         <string>ARTIFACT_FORMAT</string>
         <string>SIGNING</string>
         <string>UNITY_VERSION</string>
+        <string>GOOGLE_PLAY_RELEASE_NOTES</string>
+        <string>UPLOAD_GOOGLE_PLAY</string>
         <string>VERSION_CODE</string>
         <string>CLEAN_LIBRARY</string>
         <string>APP_VERSION</string>
@@ -42,7 +44,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>db55ff87-4108-48e5-84ad-e20a2fb8be1f</uuid>
+          <uuid>22712360-3120-40a2-a722-53965a9c2d4e</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
