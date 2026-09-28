@@ -3,14 +3,10 @@
   <actions>
     <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1"/>
     <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1">
-      <jobProperties>
-        <string>org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty</string>
-      </jobProperties>
+      <jobProperties/>
       <triggers/>
       <parameters/>
-      <options>
-        <string>skipDefaultCheckout</string>
-      </options>
+      <options/>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
   <description>iOSカスタムビルド</description>
@@ -70,13 +66,17 @@
           <description>リリースノートです（appcenterに表示します）</description>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <hudson.model.ChoiceParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>UNITY_VERSION</name>
-          <description>Unity 6.5 (6000.5.1f1)</description>
-          <choices>
-            <string>6000.5.1f1</string>
-          </choices>
-        </hudson.model.ChoiceParameterDefinition>
+          <description>ビルドに利用するUnityのバージョンです</description>
+          <quoteValue>false</quoteValue>
+          <saveJSONParameterToFile>false</saveJSONParameterToFile>
+          <visibleItemCount>1</visibleItemCount>
+          <type>PT_SINGLE_SELECT</type>
+          <value>6000.4.0f1</value>
+          <defaultValue>6000.4.0f1</defaultValue>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
         <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@388.ve7b_d0b_920e10">
           <name>BUILD_KIND</name>
           <description>クライアントのビルド種別</description>
@@ -149,16 +149,6 @@
           <name>INSTALL_POD</name>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>VALIDATE_ONLY</name>
-          <description>Validate builds without S3/App Store upload; iOS native validation also skips signing and IPA export.</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>SIGNING_VALIDATE_ONLY</name>
-          <description>Run signed archive and IPA export, but skip App Store validation and upload.</description>
-          <defaultValue>false</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -188,8 +178,8 @@
         </hudson.plugins.git.extensions.impl.CloneOption>
       </extensions>
     </scm>
-    <scriptPath>pipeline_script/PocketStriker/ios.groovy</scriptPath>
-    <lightweight>true</lightweight>
+    <scriptPath>pipeline_script/DevBuild/ios/build.groovy</scriptPath>
+    <lightweight>false</lightweight>
   </definition>
   <triggers/>
   <disabled>false</disabled>
