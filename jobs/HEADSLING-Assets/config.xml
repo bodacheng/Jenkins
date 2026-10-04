@@ -87,7 +87,7 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PUBLISH</name>
-          <description>Publish both platform catalogs and raw config to the dedicated HEADSLING bucket.</description>
+          <description>Publish both platform catalogs and raw config to the dedicated HEADSLING bucket. Selecting one platform builds and validates only; publication is skipped.</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -135,7 +135,7 @@ pipeline {
         string(name: &apos;EXPECTED_CONTENT_VERSION&apos;, defaultValue: &apos;&apos;, description: &apos;Optional positive version assertion. Blank reads ContentVersion from the source JSON; never changes it.&apos;)
         booleanParam(name: &apos;IOS&apos;, defaultValue: true, description: &apos;Build and verify the standalone iOS solo config catalog.&apos;)
         booleanParam(name: &apos;ANDROID&apos;, defaultValue: true, description: &apos;Build and verify the standalone Android solo config catalog.&apos;)
-        booleanParam(name: &apos;PUBLISH&apos;, defaultValue: true, description: &apos;Publish both platform catalogs and raw config to the dedicated HEADSLING bucket.&apos;)
+        booleanParam(name: &apos;PUBLISH&apos;, defaultValue: true, description: &apos;Publish both platform catalogs and raw config to the dedicated HEADSLING bucket. Selecting one platform builds and validates only; publication is skipped.&apos;)
         booleanParam(name: &apos;VALIDATE_ONLY&apos;, defaultValue: false, description: &apos;Build and validate locally; overrides PUBLISH and does not use AWS.&apos;)
         booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Clear only this independent job workspace Library cache.&apos;)
         choice(name: &apos;AWS_PROFILE&apos;, choices: [&apos;mcombatDev&apos;], description: &apos;Existing AWS CLI profile. Credentials are never copied into the workspace.&apos;)
@@ -155,6 +155,7 @@ pipeline {
                     env.HEADSLING_CLEAN_LIBRARY = (params.CLEAN_LIBRARY ?: false).toString()
                     env.HEADSLING_VALIDATE_ONLY = (params.VALIDATE_ONLY ?: false).toString()
                     env.HEADSLING_PUBLISH = ((params.PUBLISH == null ? true : params.PUBLISH) &amp;&amp; !params.VALIDATE_ONLY).toString()
+                    env.HEADSLING_PUBLISH_NOTE = &apos;&apos;
                     env.HEADSLING_AWS_PROFILE = params.AWS_PROFILE ?: &apos;mcombatDev&apos;
                     if (!(env.HEADSLING_SOURCE_MODE in [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;])) {
                         error(&apos;SOURCE_MODE must be LOCAL_SNAPSHOT or GIT.&apos;)
@@ -163,7 +164,10 @@ pipeline {
                         error(&apos;Select at least one platform.&apos;)
                     }
                     if (env.HEADSLING_PUBLISH == &apos;true&apos; &amp;&amp; (env.HEADSLING_IOS != &apos;true&apos; || env.HEADSLING_ANDROID != &apos;true&apos;)) {
-                        error(&apos;Publication requires both iOS and Android so shared raw config cannot advance without both catalogs. Use VALIDATE_ONLY for one platform.&apos;)
+                        env.HEADSLING_PUBLISH = &apos;false&apos;
+                        env.HEADSLING_VALIDATE_ONLY = &apos;true&apos;
+                        env.HEADSLING_PUBLISH_NOTE = &apos;Skipped: publication requires both iOS and Android; selected platform will be built and verified only.&apos;
+                        echo(env.HEADSLING_PUBLISH_NOTE)
                     }
                     if (env.HEADSLING_AWS_PROFILE != &apos;mcombatDev&apos;) {
                         error(&apos;This job uses only the existing mcombatDev AWS profile.&apos;)
@@ -252,7 +256,7 @@ PY
                     env.HEADSLING_SOLO_OUTPUT_ROOT = &quot;ServerData/solo-release/${env.HEADSLING_CONTENT_VERSION}&quot;
                     env.HEADSLING_GIT_REVISION = receipt.sourceGitRevision + (sourceDirty ? &quot;:dirty:${receipt.sourceDirtyHash}&quot; : &apos;&apos;)
                     env.HEADSLING_CI_RUN_ID = env.BUILD_TAG
-                    currentBuild.description = &quot;Solo config: ${env.HEADSLING_CONTENT_VERSION}\nSource: ${env.HEADSLING_SOURCE_MODE}\nGit: ${receipt.sourceGitRevision}\nDirty: ${sourceDirty ? receipt.sourceDirtyHash : &apos;no&apos;}\nPublish: ${env.HEADSLING_PUBLISH}&quot;
+                    currentBuild.description = &quot;Solo config: ${env.HEADSLING_CONTENT_VERSION}\nSource: ${env.HEADSLING_SOURCE_MODE}\nGit: ${receipt.sourceGitRevision}\nDirty: ${sourceDirty ? receipt.sourceDirtyHash : &apos;no&apos;}\nPublish: ${env.HEADSLING_PUBLISH}&quot; + (env.HEADSLING_PUBLISH_NOTE ? &quot;\n${env.HEADSLING_PUBLISH_NOTE}&quot; : &apos;&apos;)
                 }
                 sh &apos;&apos;&apos;#!/bin/bash
 set -euo pipefail
