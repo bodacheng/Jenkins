@@ -255,6 +255,11 @@ xcrun altool --upload-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KE
       <signature>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods newInstance java.lang.Class java.lang.Object[]</signature>
       <dangerous>false</dangerous>
     </pendingSignature>
+    <pendingSignature>
+      <context/>
+      <signature>new groovy.json.JsonSlurperClassic</signature>
+      <dangerous>false</dangerous>
+    </pendingSignature>
   </pendingSignatures>
   <pendingClasspathEntries/>
 </scriptApproval>

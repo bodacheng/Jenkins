@@ -1,0 +1,321 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1571.vb_423c255d6d9">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2277.v00573e73ddf1">
+      <jobProperties>
+        <string>org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty</string>
+        <string>jenkins.model.BuildDiscarderProperty</string>
+      </jobProperties>
+      <triggers/>
+      <parameters>
+        <string>SOURCE_MODE</string>
+        <string>BRANCH</string>
+        <string>UNITY_VERSION</string>
+        <string>EXPECTED_CONTENT_VERSION</string>
+        <string>AWS_PROFILE</string>
+        <string>PUBLISH</string>
+        <string>CLEAN_LIBRARY</string>
+        <string>LOCAL_SOURCE_PATH</string>
+        <string>IOS</string>
+        <string>ANDROID</string>
+        <string>VALIDATE_ONLY</string>
+      </parameters>
+      <options>
+        <string>skipDefaultCheckout</string>
+      </options>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>HEADSLING 单机关卡独立资产编译与 S3 发布。默认从本地 HeadGame 源码快照构建，支持 Git 分支；iOS / Android secondary catalog 与 JSON 按同一 ContentVersion 发布，归档 SHA-256、源码指纹及日志。S3：release/headsling/config/v1，AWS profile：mcombatDev。管线源：/Users/daisei/HeadGame/Jenkinsfile.assets。</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SOURCE_MODE</name>
+          <description>Local snapshot includes unpushed source changes; Git uses the selected branch.</description>
+          <choices>
+            <string>LOCAL_SNAPSHOT</string>
+            <string>GIT</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LOCAL_SOURCE_PATH</name>
+          <description>Read-only source for LOCAL_SNAPSHOT. Build caches and credentials are excluded.</description>
+          <defaultValue>/Users/daisei/HeadGame</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Git branch for GIT mode.</description>
+          <defaultValue>main</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>UNITY_VERSION</name>
+          <description>Must match the source ProjectVersion.txt.</description>
+          <choices>
+            <string>6000.5.1f1</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>EXPECTED_CONTENT_VERSION</name>
+          <description>Optional positive version assertion. Blank reads ContentVersion from the source JSON; never changes it.</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>IOS</name>
+          <description>Build and verify the standalone iOS solo config catalog.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>ANDROID</name>
+          <description>Build and verify the standalone Android solo config catalog.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>PUBLISH</name>
+          <description>Publish both platform catalogs and raw config to the existing release prefix.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>VALIDATE_ONLY</name>
+          <description>Build and validate locally; overrides PUBLISH and does not use AWS.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CLEAN_LIBRARY</name>
+          <description>Clear only this independent job workspace Library cache.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>AWS_PROFILE</name>
+          <description>Existing AWS CLI profile. Credentials are never copied into the workspace.</description>
+          <choices>
+            <string>mcombatDev</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <script>String soloBranchSpec(String branch) {
+    String value = branch?.trim() ?: &apos;main&apos;
+    value = value.replaceFirst(&apos;^refs/heads/&apos;, &apos;&apos;).replaceFirst(&apos;^origin/&apos;, &apos;&apos;)
+    return value.startsWith(&apos;*/&apos;) ? value : &quot;*/${value}&quot;
+}
+
+pipeline {
+    agent { node { label &apos;built-in&apos; } }
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        lock(resource: &apos;headsling-unity-macos&apos;)
+        buildDiscarder(logRotator(numToKeepStr: &apos;10&apos;))
+        timeout(time: 240, unit: &apos;MINUTES&apos;)
+        timestamps()
+    }
+    parameters {
+        choice(name: &apos;SOURCE_MODE&apos;, choices: [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;], description: &apos;Local snapshot includes unpushed source changes; Git uses the selected branch.&apos;)
+        string(name: &apos;LOCAL_SOURCE_PATH&apos;, defaultValue: &apos;/Users/daisei/HeadGame&apos;, description: &apos;Read-only source for LOCAL_SNAPSHOT. Build caches and credentials are excluded.&apos;)
+        string(name: &apos;BRANCH&apos;, defaultValue: &apos;main&apos;, description: &apos;Git branch for GIT mode.&apos;)
+        choice(name: &apos;UNITY_VERSION&apos;, choices: [&apos;6000.5.1f1&apos;], description: &apos;Must match the source ProjectVersion.txt.&apos;)
+        string(name: &apos;EXPECTED_CONTENT_VERSION&apos;, defaultValue: &apos;&apos;, description: &apos;Optional positive version assertion. Blank reads ContentVersion from the source JSON; never changes it.&apos;)
+        booleanParam(name: &apos;IOS&apos;, defaultValue: true, description: &apos;Build and verify the standalone iOS solo config catalog.&apos;)
+        booleanParam(name: &apos;ANDROID&apos;, defaultValue: true, description: &apos;Build and verify the standalone Android solo config catalog.&apos;)
+        booleanParam(name: &apos;PUBLISH&apos;, defaultValue: true, description: &apos;Publish both platform catalogs and raw config to the existing release prefix.&apos;)
+        booleanParam(name: &apos;VALIDATE_ONLY&apos;, defaultValue: false, description: &apos;Build and validate locally; overrides PUBLISH and does not use AWS.&apos;)
+        booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Clear only this independent job workspace Library cache.&apos;)
+        choice(name: &apos;AWS_PROFILE&apos;, choices: [&apos;mcombatDev&apos;], description: &apos;Existing AWS CLI profile. Credentials are never copied into the workspace.&apos;)
+    }
+    environment {
+        HEADSLING_SOLO_REMOTE_ROOT = &apos;https://mcombat.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
+        HEADSLING_SOLO_DESTINATION = &apos;s3://mcombat/release/headsling/config/v1&apos;
+    }
+    stages {
+        stage(&apos;Prepare Source&apos;) {
+            steps {
+                script {
+                    env.HEADSLING_SOURCE_MODE = params.SOURCE_MODE ?: &apos;LOCAL_SNAPSHOT&apos;
+                    env.HEADSLING_SOURCE_PROJECT = params.LOCAL_SOURCE_PATH?.trim() ?: &apos;/Users/daisei/HeadGame&apos;
+                    env.HEADSLING_IOS = (params.IOS == null ? true : params.IOS).toString()
+                    env.HEADSLING_ANDROID = (params.ANDROID == null ? true : params.ANDROID).toString()
+                    env.HEADSLING_CLEAN_LIBRARY = (params.CLEAN_LIBRARY ?: false).toString()
+                    env.HEADSLING_VALIDATE_ONLY = (params.VALIDATE_ONLY ?: false).toString()
+                    env.HEADSLING_PUBLISH = ((params.PUBLISH == null ? true : params.PUBLISH) &amp;&amp; !params.VALIDATE_ONLY).toString()
+                    env.HEADSLING_AWS_PROFILE = params.AWS_PROFILE ?: &apos;mcombatDev&apos;
+                    if (!(env.HEADSLING_SOURCE_MODE in [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;])) {
+                        error(&apos;SOURCE_MODE must be LOCAL_SNAPSHOT or GIT.&apos;)
+                    }
+                    if (env.HEADSLING_IOS != &apos;true&apos; &amp;&amp; env.HEADSLING_ANDROID != &apos;true&apos;) {
+                        error(&apos;Select at least one platform.&apos;)
+                    }
+                    if (env.HEADSLING_PUBLISH == &apos;true&apos; &amp;&amp; (env.HEADSLING_IOS != &apos;true&apos; || env.HEADSLING_ANDROID != &apos;true&apos;)) {
+                        error(&apos;Publication requires both iOS and Android so shared raw config cannot advance without both catalogs. Use VALIDATE_ONLY for one platform.&apos;)
+                    }
+                    if (env.HEADSLING_AWS_PROFILE != &apos;mcombatDev&apos;) {
+                        error(&apos;This job uses only the existing mcombatDev AWS profile.&apos;)
+                    }
+                    if (env.HEADSLING_SOURCE_MODE == &apos;LOCAL_SNAPSHOT&apos;) {
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -f &quot;$HEADSLING_SOURCE_PROJECT/tools/ci/prepare-solo-workspace.py&quot;
+set -- --source &quot;$HEADSLING_SOURCE_PROJECT&quot; --workspace &quot;$WORKSPACE&quot;
+if [ &quot;$HEADSLING_CLEAN_LIBRARY&quot; != &apos;true&apos; ]; then set -- &quot;$@&quot; --preserve-library; fi
+python3 &quot;$HEADSLING_SOURCE_PROJECT/tools/ci/prepare-solo-workspace.py&quot; &quot;$@&quot;
+&apos;&apos;&apos;
+                    } else {
+                        checkout([
+                            $class: &apos;GitSCM&apos;, branches: [[name: soloBranchSpec(params.BRANCH?.toString())]],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &apos;**&apos;]],
+                            userRemoteConfigs: [[credentialsId: &apos;bodacheng&apos;, url: &apos;https://github.com/bodacheng/HeadGame.git&apos;]]
+                        ])
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -f tools/ci/prepare-solo-workspace.py
+# Clear source remnants from an earlier LOCAL_SNAPSHOT run while preserving
+# ignored Unity caches. Git mode always builds exactly the selected checkout.
+git reset --hard HEAD &gt;/dev/null
+git clean -fd &gt;/dev/null
+if [ &quot;$HEADSLING_CLEAN_LIBRARY&quot; = &apos;true&apos; ]; then rm -rf &quot;$WORKSPACE/Library&quot;; fi
+rm -rf &quot;$WORKSPACE/Logs/SoloContent&quot; &quot;$WORKSPACE/Logs/Jenkins&quot; &quot;$WORKSPACE/ServerData/solo-release&quot; &quot;$WORKSPACE/Builds/SoloContentStates&quot;
+python3 tools/ci/prepare-solo-workspace.py --source &quot;$WORKSPACE&quot; --inspect-only
+&apos;&apos;&apos;
+                    }
+                }
+            }
+        }
+        stage(&apos;Preflight&apos;) {
+            steps {
+                script {
+                    def required = [&apos;tools/ci/build-solo-content.sh&apos;, &apos;tools/ci/publish-solo-content.py&apos;,
+                                    &apos;Assets/Editor/SoloContentBuilder.cs&apos;, &apos;Assets/Scripts/HeadSling/SoloChallengeCatalog.cs&apos;]
+                    def missing = required.findAll { !fileExists(it) }
+                    if (missing) error(&quot;Source is missing solo build files: ${missing.join(&apos;, &apos;)}.&quot;)
+                    // Parse with Python rather than requiring a sandbox approval
+                    // or the optional pipeline-utility-steps plugin.
+                    String receiptMetadata = sh(returnStdout: true, script: &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+python3 - &lt;&lt;&apos;PY&apos;
+import json, re
+with open(&apos;Logs/Jenkins/source-snapshot.json&apos;, encoding=&apos;utf-8&apos;) as stream:
+    receipt = json.load(stream)
+unity = receipt.get(&apos;unityVersion&apos;)
+version = receipt.get(&apos;contentVersion&apos;)
+revision = receipt.get(&apos;sourceGitRevision&apos;)
+dirty = receipt.get(&apos;sourceDirty&apos;)
+dirty_hash = receipt.get(&apos;sourceDirtyHash&apos;)
+if not isinstance(unity, str) or not re.fullmatch(r&apos;[0-9]+[.][0-9]+[.][0-9]+[abfp][0-9]+&apos;, unity):
+    raise SystemExit(&apos;Invalid source Unity version in receipt.&apos;)
+if type(version) is not int or version &lt; 1:
+    raise SystemExit(&apos;Invalid source ContentVersion in receipt.&apos;)
+if not isinstance(revision, str) or not re.fullmatch(r&apos;[0-9a-f]{40}|[0-9a-f]{64}&apos;, revision):
+    raise SystemExit(&apos;Invalid source Git revision in receipt.&apos;)
+if type(dirty) is not bool or (dirty and (not isinstance(dirty_hash, str) or not re.fullmatch(r&apos;[0-9a-f]{64}&apos;, dirty_hash))):
+    raise SystemExit(&apos;Invalid source dirty fingerprint in receipt.&apos;)
+for key, value in [(&apos;unityVersion&apos;, unity), (&apos;contentVersion&apos;, version), (&apos;sourceGitRevision&apos;, revision),
+                   (&apos;sourceDirty&apos;, str(dirty).lower()), (&apos;sourceDirtyHash&apos;, dirty_hash if dirty else &apos;&apos;)]:
+    print(str(key) + &apos;=&apos; + str(value))
+PY
+&apos;&apos;&apos;).trim()
+                    def receipt = [:]
+                    receiptMetadata.split(&apos;\n&apos;).each { line -&gt;
+                        def pair = line.split(&apos;=&apos;, 2)
+                        if (pair.length != 2) error(&apos;Invalid fixed-key source receipt metadata.&apos;)
+                        receipt[pair[0]] = pair[1]
+                    }
+                    boolean sourceDirty = receipt.sourceDirty == &apos;true&apos;
+                    if (env.HEADSLING_SOURCE_MODE == &apos;GIT&apos; &amp;&amp; sourceDirty) {
+                        error(&apos;Git source must be clean after checkout; refusing mixed source from an earlier workspace run.&apos;)
+                    }
+                    String unity = params.UNITY_VERSION ?: &apos;6000.5.1f1&apos;
+                    if (receipt.unityVersion != unity) error(&quot;Source requires Unity ${receipt.unityVersion}; selected ${unity}.&quot;)
+                    String expected = params.EXPECTED_CONTENT_VERSION?.trim()
+                    if (expected &amp;&amp; (!(expected ==~ /^[1-9][0-9]*$/) || expected != receipt.contentVersion.toString())) {
+                        error(&quot;EXPECTED_CONTENT_VERSION must match source ContentVersion ${receipt.contentVersion}; source JSON is never overwritten.&quot;)
+                    }
+                    env.HEADSLING_CONTENT_VERSION = receipt.contentVersion.toString()
+                    env.HEADSLING_UNITY_EXECUTABLE = &quot;/Applications/Unity/Hub/Editor/${unity}/Unity.app/Contents/MacOS/Unity&quot;
+                    env.HEADSLING_SOLO_OUTPUT_ROOT = &quot;ServerData/solo-release/${env.HEADSLING_CONTENT_VERSION}&quot;
+                    env.HEADSLING_GIT_REVISION = receipt.sourceGitRevision + (sourceDirty ? &quot;:dirty:${receipt.sourceDirtyHash}&quot; : &apos;&apos;)
+                    env.HEADSLING_CI_RUN_ID = env.BUILD_TAG
+                    currentBuild.description = &quot;Solo config: ${env.HEADSLING_CONTENT_VERSION}\nSource: ${env.HEADSLING_SOURCE_MODE}\nGit: ${receipt.sourceGitRevision}\nDirty: ${sourceDirty ? receipt.sourceDirtyHash : &apos;no&apos;}\nPublish: ${env.HEADSLING_PUBLISH}&quot;
+                }
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -x &quot;$HEADSLING_UNITY_EXECUTABLE&quot;
+TASK_EDITOR_ROOT=&quot;${HEADSLING_UNITY_EXECUTABLE%/Unity.app/Contents/MacOS/Unity}&quot;
+if [ &quot;$HEADSLING_IOS&quot; = &apos;true&apos; ]; then test -d &quot;$TASK_EDITOR_ROOT/PlaybackEngines/iOSSupport&quot;; fi
+if [ &quot;$HEADSLING_ANDROID&quot; = &apos;true&apos; ]; then test -d &quot;$TASK_EDITOR_ROOT/PlaybackEngines/AndroidPlayer&quot;; fi
+command -v python3 &gt;/dev/null
+if [ &quot;$HEADSLING_PUBLISH&quot; = &apos;true&apos; ]; then
+    command -v aws &gt;/dev/null
+    aws configure list --profile &quot;$HEADSLING_AWS_PROFILE&quot; &gt;/dev/null
+    aws sts get-caller-identity --profile &quot;$HEADSLING_AWS_PROFILE&quot; --no-cli-pager &gt;/dev/null
+fi
+mkdir -p Logs/SoloContent
+&apos;&apos;&apos;
+            }
+        }
+        stage(&apos;Build and Verify Solo Assets&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+set --
+if [ &quot;$HEADSLING_ANDROID&quot; = &apos;true&apos; ]; then set -- &quot;$@&quot; Android; fi
+if [ &quot;$HEADSLING_IOS&quot; = &apos;true&apos; ]; then set -- &quot;$@&quot; iOS; fi
+if bash tools/ci/build-solo-content.sh &quot;$@&quot; &gt; Logs/SoloContent/validation.log 2&gt;&amp;1; then
+    cat Logs/SoloContent/validation.log
+else
+    TASK_STATUS=$?
+    cat Logs/SoloContent/validation.log
+    exit &quot;$TASK_STATUS&quot;
+fi
+&apos;&apos;&apos;
+            }
+        }
+        stage(&apos;Publish Solo Assets&apos;) {
+            when { expression { env.HEADSLING_PUBLISH == &apos;true&apos; } }
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+if python3 tools/ci/publish-solo-content.py &quot;$HEADSLING_SOLO_OUTPUT_ROOT&quot; \
+    --targets Android iOS --profile &quot;$HEADSLING_AWS_PROFILE&quot; \
+    --destination &quot;$HEADSLING_SOLO_DESTINATION&quot; --publish \
+    &gt; Logs/SoloContent/publication.log 2&gt;&amp;1; then
+    cat Logs/SoloContent/publication.log
+else
+    TASK_STATUS=$?
+    cat Logs/SoloContent/publication.log
+    exit &quot;$TASK_STATUS&quot;
+fi
+&apos;&apos;&apos;
+            }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: &apos;Logs/Jenkins/source-snapshot.json,Logs/SoloContent/**,ServerData/solo-release/**,Builds/SoloContentStates/**&apos;,
+                allowEmptyArchive: true, fingerprint: true, followSymlinks: false
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

@@ -44,7 +44,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
           <name>BRANCH</name>
           <description>Git branch to build.</description>
-          <uuid>22712360-3120-40a2-a722-53965a9c2d4e</uuid>
+          <uuid>2ad3085c-11c6-41f4-af77-dfd37a192d42</uuid>
           <type>PT_BRANCH</type>
           <tagFilter>*</tagFilter>
           <branchFilter>origin/(.*)</branchFilter>
@@ -92,7 +92,7 @@
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>UPLOAD_GOOGLE_PLAY</name>
-          <description>Upload a Release AAB to the Google Play internal testing track as a draft release.</description>
+          <description>Upload and publish a Release AAB to all eligible internal testers on Google Play.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.TextParameterDefinition>
