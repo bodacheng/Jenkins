@@ -24,7 +24,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING Android：独立 Addressables 构建与包内资源校验，支持 APK / AAB、Debug / Release 签名。Pipeline 与默认构建分支：main。</description>
+  <description>HEADSLING Android APK / AAB 构建、签名、验证及可选 Google Play 上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。保留 VERSION_CODE 参数及 Jenkins 构建编号。管线源：/Users/daisei/HeadGame/Jenkinsfile.android。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -108,26 +108,301 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
-    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.10.0">
-      <configVersion>2</configVersion>
-      <userRemoteConfigs>
-        <hudson.plugins.git.UserRemoteConfig>
-          <url>https://github.com/bodacheng/HeadGame.git</url>
-          <credentialsId>bodacheng</credentialsId>
-        </hudson.plugins.git.UserRemoteConfig>
-      </userRemoteConfigs>
-      <branches>
-        <hudson.plugins.git.BranchSpec>
-          <name>*/main</name>
-        </hudson.plugins.git.BranchSpec>
-      </branches>
-      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-      <submoduleCfg class="empty-list"/>
-      <extensions/>
-    </scm>
-    <scriptPath>Jenkinsfile.android</scriptPath>
-    <lightweight>true</lightweight>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <script>String normalizeBranchSpec(String branch)
+{
+    String value = branch?.trim()
+    if (!value) {
+        return &apos;*/main&apos;
+    }
+
+    value = value.replaceFirst(&apos;^refs/heads/&apos;, &apos;&apos;)
+    value = value.replaceFirst(&apos;^origin/&apos;, &apos;&apos;)
+    return value.startsWith(&apos;*/&apos;) ? value : &quot;*/${value}&quot;
+}
+
+pipeline {
+    agent {
+        node {
+            label &apos;built-in&apos;
+        }
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        lock(resource: &apos;headsling-unity-macos&apos;)
+        buildDiscarder(logRotator(numToKeepStr: &apos;10&apos;))
+        timeout(time: 180, unit: &apos;MINUTES&apos;)
+        timestamps()
+    }
+
+    parameters {
+        choice(name: &apos;SOURCE_MODE&apos;, choices: [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;], description: &apos;Local snapshot includes saved, unpushed source changes; Git builds the selected branch.&apos;)
+        string(name: &apos;LOCAL_SOURCE_PATH&apos;, defaultValue: &apos;/Users/daisei/HeadGame&apos;, description: &apos;Read-only source for LOCAL_SNAPSHOT. Caches and credentials are excluded.&apos;)
+        string(name: &apos;BRANCH&apos;, defaultValue: &apos;main&apos;, description: &apos;Git branch for GIT mode. The branch must use the dedicated HEADSLING asset bucket.&apos;)
+        choice(name: &apos;UNITY_VERSION&apos;, choices: [&apos;6000.5.1f1&apos;], description: &apos;Unity version; must match ProjectVersion.txt.&apos;)
+        string(name: &apos;APP_VERSION&apos;, defaultValue: &apos;1.0&apos;, description: &apos;Android versionName.&apos;)
+        string(name: &apos;VERSION_CODE&apos;, defaultValue: &apos;&apos;, description: &apos;Positive Android versionCode; blank uses Jenkins BUILD_NUMBER.&apos;)
+        choice(name: &apos;ARTIFACT_FORMAT&apos;, choices: [&apos;APK&apos;, &apos;AAB&apos;], description: &apos;APK for direct installation; AAB for bundle validation or Google Play.&apos;)
+        choice(name: &apos;SIGNING&apos;, choices: [&apos;Debug&apos;, &apos;Release&apos;], description: &apos;Debug supports test APK/AAB builds; Google Play uploads must use Release.&apos;)
+        booleanParam(name: &apos;UPLOAD_GOOGLE_PLAY&apos;, defaultValue: false, description: &apos;Upload and publish a Release AAB to all eligible internal testers on Google Play.&apos;)
+        text(name: &apos;GOOGLE_PLAY_RELEASE_NOTES&apos;, defaultValue: &apos;&apos;, description: &apos;Optional zh-CN release notes (maximum 500 characters). A build-specific default is used when blank.&apos;)
+        booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Delete the Unity Library cache before building.&apos;)
+    }
+
+    environment {
+        HEADSLING_BUILD_TARGET = &apos;Android&apos;
+        APP_BUNDLE_ID = &apos;com.headsling.prototype&apos;
+    }
+
+    stages {
+        stage(&apos;Checkout&apos;) {
+            steps {
+                script {
+                    env.HEADSLING_SOURCE_MODE = params.SOURCE_MODE ?: &apos;LOCAL_SNAPSHOT&apos;
+                    env.HEADSLING_SOURCE_PROJECT = params.LOCAL_SOURCE_PATH?.trim() ?: &apos;/Users/daisei/HeadGame&apos;
+                    env.HEADSLING_BRANCH = normalizeBranchSpec(params.BRANCH?.toString())
+                    if (!(env.HEADSLING_SOURCE_MODE in [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;])) {
+                        error(&apos;SOURCE_MODE must be LOCAL_SNAPSHOT or GIT.&apos;)
+                    }
+                    if (env.HEADSLING_SOURCE_MODE == &apos;LOCAL_SNAPSHOT&apos;) {
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -f &quot;$HEADSLING_SOURCE_PROJECT/tools/ci/prepare-solo-workspace.py&quot;
+# The helper only writes the distinct Jenkins WORKSPACE and never the source.
+# Preserve this job&apos;s Library here; CLEAN_LIBRARY remains in Preflight.
+python3 &quot;$HEADSLING_SOURCE_PROJECT/tools/ci/prepare-solo-workspace.py&quot; \
+  --source &quot;$HEADSLING_SOURCE_PROJECT&quot; --workspace &quot;$WORKSPACE&quot; --preserve-library
+&apos;&apos;&apos;
+                    } else {
+                        checkout([
+                            $class: &apos;GitSCM&apos;,
+                            branches: [[name: env.HEADSLING_BRANCH]],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &apos;**&apos;]],
+                            userRemoteConfigs: [[
+                                credentialsId: &apos;bodacheng&apos;,
+                                url: &apos;https://github.com/bodacheng/HeadGame.git&apos;
+                            ]]
+                        ])
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -f tools/ci/prepare-solo-workspace.py
+# Remove any source left by an earlier local snapshot; retain ignored caches.
+git reset --hard HEAD &gt;/dev/null
+git clean -fd &gt;/dev/null
+rm -rf &quot;$WORKSPACE/Logs/Jenkins&quot;
+python3 tools/ci/prepare-solo-workspace.py --source &quot;$WORKSPACE&quot; --inspect-only
+&apos;&apos;&apos;
+                    }
+                    env.HEADSLING_GIT_REVISION = sh(returnStdout: true, script: &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+python3 - &lt;&lt;&apos;PY&apos;
+import json, os, re
+with open(&apos;Logs/Jenkins/source-snapshot.json&apos;, encoding=&apos;utf-8&apos;) as stream:
+    receipt = json.load(stream)
+revision = receipt.get(&apos;sourceGitRevision&apos;)
+dirty = receipt.get(&apos;sourceDirty&apos;)
+dirty_hash = receipt.get(&apos;sourceDirtyHash&apos;)
+if not isinstance(revision, str) or not re.fullmatch(r&apos;[0-9a-f]{40}|[0-9a-f]{64}&apos;, revision):
+    raise SystemExit(&apos;Invalid source Git revision in receipt.&apos;)
+if type(dirty) is not bool or (dirty and (not isinstance(dirty_hash, str) or not re.fullmatch(r&apos;[0-9a-f]{64}&apos;, dirty_hash))):
+    raise SystemExit(&apos;Invalid source dirty fingerprint in receipt.&apos;)
+if os.environ[&apos;HEADSLING_SOURCE_MODE&apos;] == &apos;GIT&apos; and dirty:
+    raise SystemExit(&apos;Git source must be clean; refusing mixed source from an earlier workspace run.&apos;)
+print(revision + (&apos;:dirty:&apos; + dirty_hash if dirty else &apos;&apos;))
+PY
+&apos;&apos;&apos;).trim()
+                }
+            }
+        }
+
+        stage(&apos;Preflight&apos;) {
+            steps {
+                script {
+                    def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/redact-build-log.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
+                    def missingBuildFiles = requiredBuildFiles.findAll { !fileExists(it) }
+                    if (missingBuildFiles) {
+                        error(&quot;Branch ${env.HEADSLING_BRANCH} is missing CI build files: ${missingBuildFiles.join(&apos;, &apos;)}. Merge the mobile pipeline changes into that branch before building.&quot;)
+                    }
+                    if (!(params.APP_VERSION ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
+                        error(&quot;APP_VERSION must contain one to three numeric components: ${params.APP_VERSION}&quot;)
+                    }
+                    String projectUnityVersion = readFile(&apos;ProjectSettings/ProjectVersion.txt&apos;)
+                        .readLines()
+                        .find { it.startsWith(&apos;m_EditorVersion:&apos;) }
+                        ?.split(&apos;:&apos;, 2)?.last()?.trim()
+                    env.HEADSLING_UNITY_VERSION = params.UNITY_VERSION?.toString()?.trim() ?: projectUnityVersion
+                    if (!env.HEADSLING_UNITY_VERSION) {
+                        error(&apos;Unable to resolve a Unity version.&apos;)
+                    }
+                    if (projectUnityVersion &amp;&amp; projectUnityVersion != env.HEADSLING_UNITY_VERSION) {
+                        error(&quot;Project requires Unity ${projectUnityVersion}; selected ${env.HEADSLING_UNITY_VERSION}.&quot;)
+                    }
+                    env.HEADSLING_CI_RUN_ID = env.BUILD_TAG
+                    // Make newly introduced parameters available to shell steps on a job&apos;s first run.
+                    env.ARTIFACT_FORMAT = params.ARTIFACT_FORMAT ?: &apos;APK&apos;
+                    env.SIGNING = params.SIGNING ?: &apos;Debug&apos;
+                    env.UPLOAD_GOOGLE_PLAY = (params.UPLOAD_GOOGLE_PLAY ?: false).toString()
+                    if (params.UPLOAD_GOOGLE_PLAY &amp;&amp; (env.ARTIFACT_FORMAT != &apos;AAB&apos; || env.SIGNING != &apos;Release&apos;)) {
+                        error(&apos;UPLOAD_GOOGLE_PLAY requires ARTIFACT_FORMAT=AAB and SIGNING=Release.&apos;)
+                    }
+                    String releaseNotes = params.GOOGLE_PLAY_RELEASE_NOTES?.trim()
+                    if (releaseNotes?.length() &gt; 500) {
+                        error(&apos;GOOGLE_PLAY_RELEASE_NOTES must not exceed 500 characters.&apos;)
+                    }
+                    String versionCode = params.VERSION_CODE?.trim() ?: env.BUILD_NUMBER
+                    if (!(versionCode ==~ /^[1-9][0-9]{0,9}$/) || versionCode.toLong() &gt; 2100000000L) {
+                        error(&apos;VERSION_CODE must be between 1 and 2100000000.&apos;)
+                    }
+                    env.HEADSLING_BUILD_NUMBER = versionCode
+                    currentBuild.description = &quot;Version: ${params.APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nSource: ${env.HEADSLING_SOURCE_MODE}\nBranch: ${env.HEADSLING_BRANCH}\nUnity: ${env.HEADSLING_UNITY_VERSION}\nGit: ${env.HEADSLING_GIT_REVISION}&quot;
+                }
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+UNITY_ROOT=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}&quot;
+test -x &quot;$UNITY_ROOT/Unity.app/Contents/MacOS/Unity&quot;
+test -x &quot;$UNITY_ROOT/PlaybackEngines/AndroidPlayer/OpenJDK/bin/java&quot;
+test -d &quot;$UNITY_ROOT/PlaybackEngines/AndroidPlayer/SDK&quot;
+test -d &quot;$UNITY_ROOT/PlaybackEngines/AndroidPlayer/NDK&quot;
+command -v python3 &gt;/dev/null
+
+# Refuse an older Git branch or local source that still embeds the shared bucket.
+python3 - &lt;&lt;&apos;PY&apos;
+import json
+with open(&apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;, encoding=&apos;utf-8&apos;) as stream:
+    settings = json.load(stream)
+expected = &apos;https://headsling-assets-664894817585.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
+if settings.get(&apos;RemoteCatalogRoot&apos;) != expected:
+    raise SystemExit(&apos;Source must use the dedicated HEADSLING bucket RemoteCatalogRoot: &apos; + expected)
+PY
+
+if [ &quot;$CLEAN_LIBRARY&quot; = true ]; then rm -rf &quot;$WORKSPACE/Library&quot;; fi
+rm -rf &quot;$WORKSPACE/Builds/Android&quot;
+# Keep the source receipt while clearing old build and verification logs.
+if [ -d &quot;$WORKSPACE/Logs/Jenkins&quot; ]; then
+    find &quot;$WORKSPACE/Logs/Jenkins&quot; -mindepth 1 -maxdepth 1 ! -name source-snapshot.json -exec rm -rf {} +
+fi
+mkdir -p &quot;$WORKSPACE/Builds/Android&quot; &quot;$WORKSPACE/Logs/Jenkins&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Build Addressables (Android)&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
+&quot;$UNITY_EXECUTABLE&quot; -projectPath &quot;$WORKSPACE&quot; -quit -batchmode -nographics \
+  -buildTarget Android -executeMethod HeadSling.Editor.HeadSlingCIBuild.BuildAddressables \
+  -logFile &quot;$WORKSPACE/Logs/Jenkins/addressables_android_${BUILD_NUMBER}.log&quot;
+test -s &quot;$WORKSPACE/Logs/Jenkins/addressables-Android.json&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Build Android&apos;) {
+            steps {
+                script {
+                    def buildAndroid = {
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+UNITY_LOG=&quot;$WORKSPACE/Logs/Jenkins/android_${BUILD_NUMBER}.log&quot;
+trap &apos;python3 tools/ci/redact-build-log.py &quot;$UNITY_LOG&quot;&apos; EXIT
+HEADSLING_PREBUILT_ADDRESSABLES=true \
+HEADSLING_BUNDLE_ID=&quot;$APP_BUNDLE_ID&quot; \
+HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
+HEADSLING_ANDROID_FORMAT=&quot;$ARTIFACT_FORMAT&quot; \
+HEADSLING_ANDROID_SIGNING=&quot;$SIGNING&quot; \
+&quot;$UNITY_EXECUTABLE&quot; -projectPath &quot;$WORKSPACE&quot; -quit -batchmode -nographics \
+  -buildTarget Android -executeMethod HeadSling.Editor.HeadSlingMobileBuilder.BuildAndroid \
+  -logFile &quot;$WORKSPACE/Logs/Jenkins/android_${BUILD_NUMBER}.log&quot;
+&apos;&apos;&apos;
+                    }
+                    if (params.SIGNING == &apos;Release&apos;) {
+                        withCredentials([
+                            file(credentialsId: &apos;HEADSLING_ANDROID_KEYSTORE&apos;, variable: &apos;HEADSLING_ANDROID_KEYSTORE&apos;),
+                            string(credentialsId: &apos;HEADSLING_ANDROID_STORE_PASSWORD&apos;, variable: &apos;HEADSLING_ANDROID_STORE_PASSWORD&apos;),
+                            string(credentialsId: &apos;HEADSLING_ANDROID_KEY_ALIAS&apos;, variable: &apos;HEADSLING_ANDROID_KEY_ALIAS&apos;),
+                            string(credentialsId: &apos;HEADSLING_ANDROID_KEY_PASSWORD&apos;, variable: &apos;HEADSLING_ANDROID_KEY_PASSWORD&apos;)
+                        ]) { buildAndroid() }
+                    } else {
+                        buildAndroid()
+                    }
+                }
+            }
+        }
+
+        stage(&apos;Verify Android Artifact&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+EXTENSION=&quot;$(printf &apos;%s&apos; &quot;$ARTIFACT_FORMAT&quot; | tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;)&quot;
+ARTIFACT=&quot;Builds/Android/HEADSLING.$EXTENSION&quot;
+test -s &quot;$ARTIFACT&quot;
+python3 tools/ci/verify-addressables.py Logs/Jenkins/addressables-Android.json &quot;$ARTIFACT&quot; \
+  --output Logs/Jenkins/addressables-android-artifact-check.json
+UNITY_ANDROID=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/PlaybackEngines/AndroidPlayer&quot;
+if [ &quot;$ARTIFACT_FORMAT&quot; = APK ]; then
+    APKSIGNER=&quot;$(find &quot;$UNITY_ANDROID/SDK/build-tools&quot; -name apksigner.jar -print | sort | tail -n 1)&quot;
+    test -n &quot;$APKSIGNER&quot;
+    &quot;$UNITY_ANDROID/OpenJDK/bin/java&quot; -jar &quot;$APKSIGNER&quot; verify --print-certs &quot;$ARTIFACT&quot; \
+      &gt; Logs/Jenkins/android-signature.txt
+else
+    # Java uses the macOS UI language instead of LC_ALL for this output. Force
+    # English so a valid bundle does not fail verification on localized agents.
+    &quot;$UNITY_ANDROID/OpenJDK/bin/jarsigner&quot; -J-Duser.language=en -J-Duser.country=US \
+      -verify &quot;$ARTIFACT&quot; &gt; Logs/Jenkins/android-signature.txt
+    grep -q &apos;^jar verified[.]$&apos; Logs/Jenkins/android-signature.txt
+fi
+shasum -a 256 &quot;$ARTIFACT&quot; &gt; &quot;$ARTIFACT.sha256&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Archive Android Artifact&apos;) {
+            steps {
+                archiveArtifacts(artifacts: &apos;Builds/Android/*&apos;, fingerprint: true, followSymlinks: false)
+            }
+        }
+
+        stage(&apos;Upload Google Play&apos;) {
+            when {
+                expression { params.UPLOAD_GOOGLE_PLAY ?: false }
+            }
+            steps {
+                script {
+                    String releaseNotes = params.GOOGLE_PLAY_RELEASE_NOTES?.trim() ?:
+                        &quot;HEADSLING internal build ${env.HEADSLING_BUILD_NUMBER}.&quot;
+                    androidApkUpload(
+                        filesPattern: &apos;Builds/Android/HEADSLING.aab&apos;,
+                        googleCredentialsId: &apos;GemWarrior&apos;,
+                        recentChangeList: [[
+                            language: &apos;zh-CN&apos;,
+                            text: releaseNotes
+                        ]],
+                        releaseName: &quot;${params.APP_VERSION} (${env.HEADSLING_BUILD_NUMBER})&quot;,
+                        rolloutPercentage: &apos;100&apos;,
+                        trackName: &apos;internal&apos;
+                    )
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts(allowEmptyArchive: true,
+                artifacts: &apos;Logs/Jenkins/**, Logs/AndroidBuildSummary.txt, Assets/AddressableAssetsData/Android/addressables_content_state.bin&apos;,
+                fingerprint: true, followSymlinks: false)
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
   </definition>
   <triggers/>
   <disabled>false</disabled>

@@ -9,9 +9,11 @@
       </jobProperties>
       <triggers/>
       <parameters>
+        <string>SOURCE_MODE</string>
         <string>BRANCH</string>
         <string>UNITY_VERSION</string>
         <string>CLEAN_LIBRARY</string>
+        <string>LOCAL_SOURCE_PATH</string>
         <string>APP_VERSION</string>
         <string>UPLOAD_APP_STORE</string>
       </parameters>
@@ -20,7 +22,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING iOS：独立 Addressables 构建与包内资源校验，使用最新发布描述文件和本机证书导出 IPA。Pipeline 与默认构建分支：main。</description>
+  <description>HEADSLING iOS App Store 构建、签名、验证与上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。构建编号沿用 Jenkins BUILD_NUMBER。管线源：/Users/daisei/HeadGame/Jenkinsfile.ios。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -37,21 +39,26 @@
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@462.463.v496a_59f698e5">
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SOURCE_MODE</name>
+          <description>Local snapshot includes saved, unpushed source changes; Git builds the selected branch.</description>
+          <choices>
+            <string>LOCAL_SNAPSHOT</string>
+            <string>GIT</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LOCAL_SOURCE_PATH</name>
+          <description>Read-only source for LOCAL_SNAPSHOT. Caches and credentials are excluded.</description>
+          <defaultValue>/Users/daisei/HeadGame</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description>Git branch to build.</description>
-          <uuid>7f6bd8d2-a328-4ceb-91d0-8425c9ad5582</uuid>
-          <type>PT_BRANCH</type>
-          <tagFilter>*</tagFilter>
-          <branchFilter>origin/(.*)</branchFilter>
-          <sortMode>ASCENDING_SMART</sortMode>
+          <description>Git branch for GIT mode. The branch must use the dedicated HEADSLING asset bucket.</description>
           <defaultValue>main</defaultValue>
-          <selectedValue>DEFAULT</selectedValue>
-          <useRepository>https://github.com/bodacheng/HeadGame.git</useRepository>
-          <quickFilterEnabled>true</quickFilterEnabled>
-          <listSize>5</listSize>
-          <requiredParameter>false</requiredParameter>
-        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>UNITY_VERSION</name>
           <description>Unity version; must match ProjectVersion.txt.</description>
@@ -78,26 +85,362 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
-    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.10.0">
-      <configVersion>2</configVersion>
-      <userRemoteConfigs>
-        <hudson.plugins.git.UserRemoteConfig>
-          <url>https://github.com/bodacheng/HeadGame.git</url>
-          <credentialsId>bodacheng</credentialsId>
-        </hudson.plugins.git.UserRemoteConfig>
-      </userRemoteConfigs>
-      <branches>
-        <hudson.plugins.git.BranchSpec>
-          <name>*/main</name>
-        </hudson.plugins.git.BranchSpec>
-      </branches>
-      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-      <submoduleCfg class="empty-list"/>
-      <extensions/>
-    </scm>
-    <scriptPath>Jenkinsfile.ios</scriptPath>
-    <lightweight>true</lightweight>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
+    <script>String normalizeBranchSpec(String branch)
+{
+    String value = branch?.trim()
+    if (!value) {
+        return &apos;*/main&apos;
+    }
+
+    value = value.replaceFirst(&apos;^refs/heads/&apos;, &apos;&apos;)
+    value = value.replaceFirst(&apos;^origin/&apos;, &apos;&apos;)
+    return value.startsWith(&apos;*/&apos;) ? value : &quot;*/${value}&quot;
+}
+
+pipeline {
+    agent {
+        node {
+            label &apos;built-in&apos;
+        }
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        lock(resource: &apos;headsling-unity-macos&apos;)
+        buildDiscarder(logRotator(numToKeepStr: &apos;10&apos;))
+        timeout(time: 240, unit: &apos;MINUTES&apos;)
+        timestamps()
+    }
+
+    parameters {
+        choice(name: &apos;SOURCE_MODE&apos;, choices: [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;], description: &apos;Local snapshot includes saved, unpushed source changes; Git builds the selected branch.&apos;)
+        string(name: &apos;LOCAL_SOURCE_PATH&apos;, defaultValue: &apos;/Users/daisei/HeadGame&apos;, description: &apos;Read-only source for LOCAL_SNAPSHOT. Caches and credentials are excluded.&apos;)
+        string(name: &apos;BRANCH&apos;, defaultValue: &apos;main&apos;, description: &apos;Git branch for GIT mode. The branch must use the dedicated HEADSLING asset bucket.&apos;)
+        choice(name: &apos;UNITY_VERSION&apos;, choices: [&apos;6000.5.1f1&apos;], description: &apos;Unity version; must match ProjectVersion.txt.&apos;)
+        string(name: &apos;APP_VERSION&apos;, defaultValue: &apos;1.0&apos;, description: &apos;App Store version (CFBundleShortVersionString).&apos;)
+        booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Delete the Unity Library cache before building.&apos;)
+        booleanParam(name: &apos;UPLOAD_APP_STORE&apos;, defaultValue: true, description: &apos;Validate and upload the IPA to App Store Connect.&apos;)
+    }
+
+    environment {
+        HEADSLING_BUILD_TARGET = &apos;iOS&apos;
+        UNITY_BUILD_METHOD = &apos;HeadSling.Editor.HeadSlingMobileBuilder.BuildIOS&apos;
+        APPLE_TEAM_ID = &apos;S88E744TXJ&apos;
+        APP_BUNDLE_ID = &apos;com.headsling.prototype&apos;
+        XCODE_OUTPUT_PATH = &apos;Builds/iOS&apos;
+        ARCHIVE_PATH = &apos;Builds/iOSArchive/HEADSLING.xcarchive&apos;
+        IPA_OUTPUT_PATH = &apos;Builds/iOSIPA&apos;
+        DERIVED_DATA_PATH = &apos;Builds/iOSDerivedData&apos;
+        EXPORT_OPTIONS_PATH = &apos;Builds/iOSExportOptions.plist&apos;
+    }
+
+    stages {
+        stage(&apos;Checkout&apos;) {
+            steps {
+                script {
+                    env.HEADSLING_SOURCE_MODE = params.SOURCE_MODE ?: &apos;LOCAL_SNAPSHOT&apos;
+                    env.HEADSLING_SOURCE_PROJECT = params.LOCAL_SOURCE_PATH?.trim() ?: &apos;/Users/daisei/HeadGame&apos;
+                    env.HEADSLING_BRANCH = normalizeBranchSpec(params.BRANCH?.toString())
+                    if (!(env.HEADSLING_SOURCE_MODE in [&apos;LOCAL_SNAPSHOT&apos;, &apos;GIT&apos;])) {
+                        error(&apos;SOURCE_MODE must be LOCAL_SNAPSHOT or GIT.&apos;)
+                    }
+                    if (env.HEADSLING_SOURCE_MODE == &apos;LOCAL_SNAPSHOT&apos;) {
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -f &quot;$HEADSLING_SOURCE_PROJECT/tools/ci/prepare-solo-workspace.py&quot;
+# The helper only writes the distinct Jenkins WORKSPACE and never the source.
+# Preserve this job&apos;s Library here; CLEAN_LIBRARY remains in Preflight.
+python3 &quot;$HEADSLING_SOURCE_PROJECT/tools/ci/prepare-solo-workspace.py&quot; \
+  --source &quot;$HEADSLING_SOURCE_PROJECT&quot; --workspace &quot;$WORKSPACE&quot; --preserve-library
+&apos;&apos;&apos;
+                    } else {
+                        checkout([
+                            $class: &apos;GitSCM&apos;,
+                            branches: [[name: env.HEADSLING_BRANCH]],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &apos;**&apos;]],
+                            userRemoteConfigs: [[
+                                credentialsId: &apos;bodacheng&apos;,
+                                url: &apos;https://github.com/bodacheng/HeadGame.git&apos;
+                            ]]
+                        ])
+                        sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+test -f tools/ci/prepare-solo-workspace.py
+# Remove any source left by an earlier local snapshot; retain ignored caches.
+git reset --hard HEAD &gt;/dev/null
+git clean -fd &gt;/dev/null
+rm -rf &quot;$WORKSPACE/Logs/Jenkins&quot;
+python3 tools/ci/prepare-solo-workspace.py --source &quot;$WORKSPACE&quot; --inspect-only
+&apos;&apos;&apos;
+                    }
+                    env.HEADSLING_GIT_REVISION = sh(returnStdout: true, script: &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+python3 - &lt;&lt;&apos;PY&apos;
+import json, os, re
+with open(&apos;Logs/Jenkins/source-snapshot.json&apos;, encoding=&apos;utf-8&apos;) as stream:
+    receipt = json.load(stream)
+revision = receipt.get(&apos;sourceGitRevision&apos;)
+dirty = receipt.get(&apos;sourceDirty&apos;)
+dirty_hash = receipt.get(&apos;sourceDirtyHash&apos;)
+if not isinstance(revision, str) or not re.fullmatch(r&apos;[0-9a-f]{40}|[0-9a-f]{64}&apos;, revision):
+    raise SystemExit(&apos;Invalid source Git revision in receipt.&apos;)
+if type(dirty) is not bool or (dirty and (not isinstance(dirty_hash, str) or not re.fullmatch(r&apos;[0-9a-f]{64}&apos;, dirty_hash))):
+    raise SystemExit(&apos;Invalid source dirty fingerprint in receipt.&apos;)
+if os.environ[&apos;HEADSLING_SOURCE_MODE&apos;] == &apos;GIT&apos; and dirty:
+    raise SystemExit(&apos;Git source must be clean; refusing mixed source from an earlier workspace run.&apos;)
+print(revision + (&apos;:dirty:&apos; + dirty_hash if dirty else &apos;&apos;))
+PY
+&apos;&apos;&apos;).trim()
+                }
+            }
+        }
+
+        stage(&apos;Preflight&apos;) {
+            steps {
+                script {
+                    def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/prepare-ios-signing.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
+                    def missingBuildFiles = requiredBuildFiles.findAll { !fileExists(it) }
+                    if (missingBuildFiles) {
+                        error(&quot;Branch ${env.HEADSLING_BRANCH} is missing CI build files: ${missingBuildFiles.join(&apos;, &apos;)}. Merge the mobile pipeline changes into that branch before building.&quot;)
+                    }
+                    if (!(params.APP_VERSION ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
+                        error(&quot;APP_VERSION must contain one to three numeric components: ${params.APP_VERSION}&quot;)
+                    }
+                    String projectUnityVersion = readFile(&apos;ProjectSettings/ProjectVersion.txt&apos;)
+                        .readLines()
+                        .find { it.startsWith(&apos;m_EditorVersion:&apos;) }
+                        ?.split(&apos;:&apos;, 2)?.last()?.trim()
+                    env.HEADSLING_UNITY_VERSION = params.UNITY_VERSION?.toString()?.trim() ?: projectUnityVersion
+                    if (!env.HEADSLING_UNITY_VERSION) {
+                        error(&apos;Unable to resolve a Unity version.&apos;)
+                    }
+                    if (projectUnityVersion &amp;&amp; projectUnityVersion != env.HEADSLING_UNITY_VERSION) {
+                        error(&quot;Project requires Unity ${projectUnityVersion}; selected ${env.HEADSLING_UNITY_VERSION}.&quot;)
+                    }
+                    env.HEADSLING_CI_RUN_ID = env.BUILD_TAG
+                    currentBuild.description = &quot;Version: ${params.APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nSource: ${env.HEADSLING_SOURCE_MODE}\nBranch: ${env.HEADSLING_BRANCH}\nUnity: ${env.HEADSLING_UNITY_VERSION}\nGit: ${env.HEADSLING_GIT_REVISION}&quot;
+                }
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+if [ ! -x &quot;$UNITY_EXECUTABLE&quot; ]; then
+    echo &quot;Unity executable not found: $UNITY_EXECUTABLE&quot; &gt;&amp;2
+    exit 2
+fi
+
+test -d &quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/PlaybackEngines/iOSSupport&quot;
+command -v python3 &gt;/dev/null
+
+# Both source modes must embed the newly dedicated bucket. In particular, a
+# future Git build must not silently use an older branch with the shared bucket.
+python3 - &lt;&lt;&apos;PY&apos;
+import json
+with open(&apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;, encoding=&apos;utf-8&apos;) as stream:
+    settings = json.load(stream)
+expected = &apos;https://headsling-assets-664894817585.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
+if settings.get(&apos;RemoteCatalogRoot&apos;) != expected:
+    raise SystemExit(&apos;Source must use the dedicated HEADSLING bucket RemoteCatalogRoot: &apos; + expected)
+PY
+
+if [ &quot;$CLEAN_LIBRARY&quot; = &quot;true&quot; ]; then
+    rm -rf &quot;$WORKSPACE/Library&quot;
+fi
+
+# Keep the provenance receipt produced by Checkout while clearing old logs.
+if [ -d &quot;$WORKSPACE/Logs/Jenkins&quot; ]; then
+    find &quot;$WORKSPACE/Logs/Jenkins&quot; -mindepth 1 -maxdepth 1 ! -name source-snapshot.json -exec rm -rf {} +
+fi
+rm -rf &quot;$WORKSPACE/$XCODE_OUTPUT_PATH&quot; &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+       &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot;
+mkdir -p &quot;$WORKSPACE/Logs/Jenkins&quot; &quot;$WORKSPACE/$(dirname &quot;$ARCHIVE_PATH&quot;)&quot; \
+         &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot;
+
+echo &quot;Branch $HEADSLING_BRANCH&quot;
+echo &quot;Git $HEADSLING_GIT_REVISION&quot;
+echo &quot;Unity $HEADSLING_UNITY_VERSION&quot;
+xcodebuild -version
+security find-identity -v -p codesigning
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Build Addressables (iOS)&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
+&quot;$UNITY_EXECUTABLE&quot; -projectPath &quot;$WORKSPACE&quot; -quit -batchmode -nographics \
+  -buildTarget iOS -executeMethod HeadSling.Editor.HeadSlingCIBuild.BuildAddressables \
+  -logFile &quot;$WORKSPACE/Logs/Jenkins/addressables_ios_${BUILD_NUMBER}.log&quot;
+test -s &quot;$WORKSPACE/Logs/Jenkins/addressables-iOS.json&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Unity Export&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
+
+HEADSLING_PREBUILT_ADDRESSABLES=true \
+HEADSLING_BUNDLE_ID=&quot;$APP_BUNDLE_ID&quot; \
+HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
+HEADSLING_BUILD_NUMBER=&quot;$BUILD_NUMBER&quot; \
+&quot;$UNITY_EXECUTABLE&quot; \
+  -projectPath &quot;$WORKSPACE&quot; \
+  -quit \
+  -batchmode \
+  -nographics \
+  -buildTarget iOS \
+  -executeMethod &quot;$UNITY_BUILD_METHOD&quot; \
+  -logFile &quot;$WORKSPACE/Logs/Jenkins/ios_${BUILD_NUMBER}.log&quot;
+
+python3 tools/ci/verify-addressables.py Logs/Jenkins/addressables-iOS.json &quot;$XCODE_OUTPUT_PATH&quot; \
+  --output Logs/Jenkins/addressables-ios-export-check.json
+
+# HEADSLING only uses the operating system&apos;s exempt HTTPS/TLS encryption.
+# Embedding the declaration prevents App Store Connect from asking for export
+# compliance information again for every uploaded build.
+APP_INFO_PLIST=&quot;$WORKSPACE/$XCODE_OUTPUT_PATH/Info.plist&quot;
+/usr/libexec/PlistBuddy -c &quot;Add :ITSAppUsesNonExemptEncryption bool false&quot; &quot;$APP_INFO_PLIST&quot; 2&gt;/dev/null || \
+  /usr/libexec/PlistBuddy -c &quot;Set :ITSAppUsesNonExemptEncryption false&quot; &quot;$APP_INFO_PLIST&quot;
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Prepare iOS Signing&apos;) {
+            steps {
+                withCredentials([
+                    string(credentialsId: &apos;PCUSER_PASSWORD&apos;, variable: &apos;KEYCHAIN_PASSWORD&apos;),
+                    string(credentialsId: &apos;HEADSLING_ASC_KEY_ID&apos;, variable: &apos;API_KEY&apos;),
+                    string(credentialsId: &apos;HEADSLING_ASC_ISSUER_ID&apos;, variable: &apos;API_ISSUER&apos;)
+                ]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+KEYCHAIN=&quot;$HOME/Library/Keychains/login.keychain-db&quot;
+security unlock-keychain -p &quot;$KEYCHAIN_PASSWORD&quot; &quot;$KEYCHAIN&quot;
+security set-keychain-settings -lut 21600 &quot;$KEYCHAIN&quot;
+python3 tools/ci/prepare-ios-signing.py
+&apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Xcode Archive&apos;) {
+            steps {
+                withCredentials([
+                    string(credentialsId: &apos;HEADSLING_ASC_KEY_ID&apos;, variable: &apos;API_KEY&apos;),
+                    string(credentialsId: &apos;HEADSLING_ASC_ISSUER_ID&apos;, variable: &apos;API_ISSUER&apos;)
+                ]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+PRIVATE_KEY=&quot;$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY}.p8&quot;
+test -f &quot;$PRIVATE_KEY&quot;
+
+cd &quot;$WORKSPACE/$XCODE_OUTPUT_PATH&quot;
+if [ -d &quot;Unity-iPhone.xcworkspace&quot; ]; then
+    CONTAINER_ARGS=( -workspace &quot;Unity-iPhone.xcworkspace&quot; )
+elif [ -d &quot;Unity-iPhone.xcodeproj&quot; ]; then
+    CONTAINER_ARGS=( -project &quot;Unity-iPhone.xcodeproj&quot; )
+else
+    echo &quot;Unity-iPhone Xcode project was not generated.&quot; &gt;&amp;2
+    exit 3
+fi
+
+xcodebuild &quot;${CONTAINER_ARGS[@]}&quot; \
+  -allowProvisioningUpdates \
+  -authenticationKeyPath &quot;$PRIVATE_KEY&quot; \
+  -authenticationKeyID &quot;$API_KEY&quot; \
+  -authenticationKeyIssuerID &quot;$API_ISSUER&quot; \
+  -scheme Unity-iPhone \
+  -configuration Release \
+  -destination &apos;generic/platform=iOS&apos; \
+  -archivePath &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+  -derivedDataPath &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot; \
+  archive \
+  CODE_SIGN_STYLE=Automatic \
+  DEVELOPMENT_TEAM=&quot;$APPLE_TEAM_ID&quot; \
+  MARKETING_VERSION=&quot;$APP_VERSION&quot; \
+  CURRENT_PROJECT_VERSION=&quot;$BUILD_NUMBER&quot;
+&apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Export IPA&apos;) {
+            steps {
+                sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+xcodebuild -exportArchive \
+  -archivePath &quot;$WORKSPACE/$ARCHIVE_PATH&quot; \
+  -exportPath &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; \
+  -exportOptionsPlist &quot;$WORKSPACE/$EXPORT_OPTIONS_PATH&quot;
+IPA_FILE=&quot;$(find &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; -maxdepth 1 -type f -name &apos;*.ipa&apos; -print -quit)&quot;
+test -n &quot;$IPA_FILE&quot;
+python3 tools/ci/verify-addressables.py Logs/Jenkins/addressables-iOS.json &quot;$IPA_FILE&quot; \
+  --output Logs/Jenkins/addressables-ios-ipa-check.json
+&apos;&apos;&apos;
+            }
+        }
+
+        stage(&apos;Archive IPA&apos;) {
+            steps {
+                archiveArtifacts(
+                    artifacts: &apos;Builds/iOSIPA/*.ipa&apos;,
+                    fingerprint: true,
+                    followSymlinks: false
+                )
+            }
+        }
+
+        stage(&apos;Upload App Store&apos;) {
+            when {
+                expression { return params.UPLOAD_APP_STORE }
+            }
+            steps {
+                withCredentials([
+                    string(credentialsId: &apos;HEADSLING_ASC_KEY_ID&apos;, variable: &apos;API_KEY&apos;),
+                    string(credentialsId: &apos;HEADSLING_ASC_ISSUER_ID&apos;, variable: &apos;API_ISSUER&apos;)
+                ]) {
+                    sh &apos;&apos;&apos;#!/bin/bash
+set -euo pipefail
+
+PRIVATE_KEY=&quot;$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY}.p8&quot;
+if [ ! -f &quot;$PRIVATE_KEY&quot; ]; then
+    echo &quot;App Store Connect private key is missing: ~/.appstoreconnect/private_keys/AuthKey_&lt;key-id&gt;.p8&quot; &gt;&amp;2
+    exit 4
+fi
+
+IPA_FILE=&quot;$(find &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; -maxdepth 1 -type f -name &apos;*.ipa&apos; -print -quit)&quot;
+xcrun altool --validate-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KEY&quot; --apiIssuer &quot;$API_ISSUER&quot;
+xcrun altool --upload-app -f &quot;$IPA_FILE&quot; -t ios --apiKey &quot;$API_KEY&quot; --apiIssuer &quot;$API_ISSUER&quot;
+&apos;&apos;&apos;
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts(
+                allowEmptyArchive: true,
+                artifacts: &quot;Logs/Jenkins/**, Logs/iOSBuildSummary.txt, Assets/AddressableAssetsData/iOS/addressables_content_state.bin, Builds/iOSExportOptions.plist, Builds/iOSIPA/*.ipa&quot;,
+                fingerprint: true,
+                followSymlinks: false
+            )
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
   </definition>
   <triggers/>
   <disabled>false</disabled>

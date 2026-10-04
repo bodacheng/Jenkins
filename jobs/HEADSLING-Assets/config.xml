@@ -26,9 +26,21 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING 单机关卡独立资产编译与 S3 发布。默认从本地 HeadGame 源码快照构建，支持 Git 分支；iOS / Android secondary catalog 与 JSON 按同一 ContentVersion 发布，归档 SHA-256、源码指纹及日志。S3：release/headsling/config/v1，AWS profile：mcombatDev。管线源：/Users/daisei/HeadGame/Jenkinsfile.assets。</description>
+  <description>HEADSLING 单机关卡独立资产编译与 S3 发布。默认从本地 HeadGame 源码快照构建，支持 Git 分支；iOS / Android secondary catalog 与 JSON 按同一 ContentVersion 发布，归档 SHA-256、源码指纹及日志。S3：headsling-assets-664894817585/release/headsling/config/v1，AWS profile：mcombatDev。管线源：/Users/daisei/HeadGame/Jenkinsfile.assets。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.ChoiceParameterDefinition>
@@ -75,7 +87,7 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PUBLISH</name>
-          <description>Publish both platform catalogs and raw config to the existing release prefix.</description>
+          <description>Publish both platform catalogs and raw config to the dedicated HEADSLING bucket.</description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -97,18 +109,6 @@
         </hudson.model.ChoiceParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <jenkins.model.BuildDiscarderProperty>
-      <strategy class="hudson.tasks.LogRotator">
-        <daysToKeep>-1</daysToKeep>
-        <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
-        <removeLastBuild>false</removeLastBuild>
-      </strategy>
-    </jenkins.model.BuildDiscarderProperty>
-    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
-      <abortPrevious>false</abortPrevious>
-    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4259.vf653c2b_8a_b_69">
     <script>String soloBranchSpec(String branch) {
@@ -135,14 +135,14 @@ pipeline {
         string(name: &apos;EXPECTED_CONTENT_VERSION&apos;, defaultValue: &apos;&apos;, description: &apos;Optional positive version assertion. Blank reads ContentVersion from the source JSON; never changes it.&apos;)
         booleanParam(name: &apos;IOS&apos;, defaultValue: true, description: &apos;Build and verify the standalone iOS solo config catalog.&apos;)
         booleanParam(name: &apos;ANDROID&apos;, defaultValue: true, description: &apos;Build and verify the standalone Android solo config catalog.&apos;)
-        booleanParam(name: &apos;PUBLISH&apos;, defaultValue: true, description: &apos;Publish both platform catalogs and raw config to the existing release prefix.&apos;)
+        booleanParam(name: &apos;PUBLISH&apos;, defaultValue: true, description: &apos;Publish both platform catalogs and raw config to the dedicated HEADSLING bucket.&apos;)
         booleanParam(name: &apos;VALIDATE_ONLY&apos;, defaultValue: false, description: &apos;Build and validate locally; overrides PUBLISH and does not use AWS.&apos;)
         booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Clear only this independent job workspace Library cache.&apos;)
         choice(name: &apos;AWS_PROFILE&apos;, choices: [&apos;mcombatDev&apos;], description: &apos;Existing AWS CLI profile. Credentials are never copied into the workspace.&apos;)
     }
     environment {
-        HEADSLING_SOLO_REMOTE_ROOT = &apos;https://mcombat.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
-        HEADSLING_SOLO_DESTINATION = &apos;s3://mcombat/release/headsling/config/v1&apos;
+        HEADSLING_SOLO_REMOTE_ROOT = &apos;https://headsling-assets-664894817585.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
+        HEADSLING_SOLO_DESTINATION = &apos;s3://headsling-assets-664894817585/release/headsling/config/v1&apos;
     }
     stages {
         stage(&apos;Prepare Source&apos;) {
