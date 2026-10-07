@@ -1,6 +1,21 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <org.jenkins.plugins.lockableresources.LockableResourcesManager plugin="lockable-resources@1469.v52dff5a_80e32">
-  <resources/>
+  <resources>
+    <org.jenkins.plugins.lockableresources.LockableResource>
+      <name>headsling-unity-macos</name>
+      <description></description>
+      <labelsAsList/>
+      <reservedTimestamp>2026-10-07 02:56:49.293 UTC</reservedTimestamp>
+      <note></note>
+      <stolen>false</stolen>
+      <ephemeral>true</ephemeral>
+      <properties/>
+      <queueItemId>0</queueItemId>
+      <buildExternalizableId>HEADSLING-iOS-AppStore#49</buildExternalizableId>
+      <queuingStarted>0</queuingStarted>
+      <queuedContexts/>
+    </org.jenkins.plugins.lockableresources.LockableResource>
+  </resources>
   <allowEmptyOrNullValues>false</allowEmptyOrNullValues>
   <queuedContexts/>
   <enableSave>1</enableSave>

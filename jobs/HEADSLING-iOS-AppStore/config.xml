@@ -14,7 +14,6 @@
         <string>UNITY_VERSION</string>
         <string>CLEAN_LIBRARY</string>
         <string>LOCAL_SOURCE_PATH</string>
-        <string>APP_VERSION</string>
         <string>UPLOAD_APP_STORE</string>
       </parameters>
       <options>
@@ -22,7 +21,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING iOS App Store 构建、签名、验证与上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。构建编号沿用 Jenkins BUILD_NUMBER。管线源：/Users/daisei/HeadGame/Jenkinsfile.ios。</description>
+  <description>HEADSLING iOS App Store 构建、签名、验证与上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。应用版本读取构建源码的 Unity Player Settings Version，构建编号沿用 Jenkins BUILD_NUMBER。管线源：/Users/daisei/HeadGame/Jenkinsfile.ios。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -66,12 +65,6 @@
             <string>6000.5.1f1</string>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>APP_VERSION</name>
-          <description>App Store version (CFBundleShortVersionString).</description>
-          <defaultValue>1.0</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>CLEAN_LIBRARY</name>
           <description>Delete the Unity Library cache before building.</description>
@@ -98,6 +91,23 @@
     return value.startsWith(&apos;*/&apos;) ? value : &quot;*/${value}&quot;
 }
 
+String readProjectAppVersion(String projectSettings)
+{
+    def lines = projectSettings.readLines().findAll { it.startsWith(&apos;  bundleVersion:&apos;) }
+    if (lines.size() != 1) {
+        error(&apos;ProjectSettings/ProjectSettings.asset must contain exactly one PlayerSettings bundleVersion.&apos;)
+    }
+    String version = lines[0].split(&apos;:&apos;, 2)[1].trim()
+    if (version.length() &gt;= 2 &amp;&amp; ((version.startsWith(&apos;&quot;&apos;) &amp;&amp; version.endsWith(&apos;&quot;&apos;)) ||
+        (version.startsWith(&quot;&apos;&quot;) &amp;&amp; version.endsWith(&quot;&apos;&quot;)))) {
+        version = version.substring(1, version.length() - 1)
+    }
+    if (!(version ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
+        error(&quot;Unity Player Settings Version must contain one to three numeric components: ${version}&quot;)
+    }
+    return version
+}
+
 pipeline {
     agent {
         node {
@@ -119,7 +129,6 @@ pipeline {
         string(name: &apos;LOCAL_SOURCE_PATH&apos;, defaultValue: &apos;/Users/daisei/HeadGame&apos;, description: &apos;Read-only source for LOCAL_SNAPSHOT. Caches and credentials are excluded.&apos;)
         string(name: &apos;BRANCH&apos;, defaultValue: &apos;main&apos;, description: &apos;Git branch for GIT mode. The branch must use the dedicated HEADSLING asset bucket.&apos;)
         choice(name: &apos;UNITY_VERSION&apos;, choices: [&apos;6000.5.1f1&apos;], description: &apos;Unity version; must match ProjectVersion.txt.&apos;)
-        string(name: &apos;APP_VERSION&apos;, defaultValue: &apos;1.0&apos;, description: &apos;App Store version (CFBundleShortVersionString).&apos;)
         booleanParam(name: &apos;CLEAN_LIBRARY&apos;, defaultValue: false, description: &apos;Delete the Unity Library cache before building.&apos;)
         booleanParam(name: &apos;UPLOAD_APP_STORE&apos;, defaultValue: true, description: &apos;Validate and upload the IPA to App Store Connect.&apos;)
     }
@@ -206,9 +215,7 @@ PY
                     if (missingBuildFiles) {
                         error(&quot;Branch ${env.HEADSLING_BRANCH} is missing CI build files: ${missingBuildFiles.join(&apos;, &apos;)}. Merge the mobile pipeline changes into that branch before building.&quot;)
                     }
-                    if (!(params.APP_VERSION ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
-                        error(&quot;APP_VERSION must contain one to three numeric components: ${params.APP_VERSION}&quot;)
-                    }
+                    env.HEADSLING_APP_VERSION = readProjectAppVersion(readFile(&apos;ProjectSettings/ProjectSettings.asset&apos;))
                     String projectUnityVersion = readFile(&apos;ProjectSettings/ProjectVersion.txt&apos;)
                         .readLines()
                         .find { it.startsWith(&apos;m_EditorVersion:&apos;) }
@@ -221,7 +228,7 @@ PY
                         error(&quot;Project requires Unity ${projectUnityVersion}; selected ${env.HEADSLING_UNITY_VERSION}.&quot;)
                     }
                     env.HEADSLING_CI_RUN_ID = env.BUILD_TAG
-                    currentBuild.description = &quot;Version: ${params.APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nSource: ${env.HEADSLING_SOURCE_MODE}\nBranch: ${env.HEADSLING_BRANCH}\nUnity: ${env.HEADSLING_UNITY_VERSION}\nGit: ${env.HEADSLING_GIT_REVISION}&quot;
+                    currentBuild.description = &quot;Version: ${env.HEADSLING_APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nSource: ${env.HEADSLING_SOURCE_MODE}\nBranch: ${env.HEADSLING_BRANCH}\nUnity: ${env.HEADSLING_UNITY_VERSION}\nGit: ${env.HEADSLING_GIT_REVISION}&quot;
                 }
                 sh &apos;&apos;&apos;#!/bin/bash
 set -euo pipefail
@@ -262,6 +269,7 @@ mkdir -p &quot;$WORKSPACE/Logs/Jenkins&quot; &quot;$WORKSPACE/$(dirname &quot;$A
 echo &quot;Branch $HEADSLING_BRANCH&quot;
 echo &quot;Git $HEADSLING_GIT_REVISION&quot;
 echo &quot;Unity $HEADSLING_UNITY_VERSION&quot;
+echo &quot;App version $HEADSLING_APP_VERSION (Unity Player Settings)&quot;
 xcodebuild -version
 security find-identity -v -p codesigning
 &apos;&apos;&apos;
@@ -273,7 +281,6 @@ security find-identity -v -p codesigning
                 sh &apos;&apos;&apos;#!/bin/bash
 set -euo pipefail
 UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
-HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
 &quot;$UNITY_EXECUTABLE&quot; -projectPath &quot;$WORKSPACE&quot; -quit -batchmode -nographics \
   -buildTarget iOS -executeMethod HeadSling.Editor.HeadSlingCIBuild.BuildAddressables \
   -logFile &quot;$WORKSPACE/Logs/Jenkins/addressables_ios_${BUILD_NUMBER}.log&quot;
@@ -291,7 +298,6 @@ UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}
 
 HEADSLING_PREBUILT_ADDRESSABLES=true \
 HEADSLING_BUNDLE_ID=&quot;$APP_BUNDLE_ID&quot; \
-HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
 HEADSLING_BUILD_NUMBER=&quot;$BUILD_NUMBER&quot; \
 &quot;$UNITY_EXECUTABLE&quot; \
   -projectPath &quot;$WORKSPACE&quot; \
@@ -368,7 +374,7 @@ xcodebuild &quot;${CONTAINER_ARGS[@]}&quot; \
   archive \
   CODE_SIGN_STYLE=Automatic \
   DEVELOPMENT_TEAM=&quot;$APPLE_TEAM_ID&quot; \
-  MARKETING_VERSION=&quot;$APP_VERSION&quot; \
+  MARKETING_VERSION=&quot;$HEADSLING_APP_VERSION&quot; \
   CURRENT_PROJECT_VERSION=&quot;$BUILD_NUMBER&quot;
 &apos;&apos;&apos;
                 }

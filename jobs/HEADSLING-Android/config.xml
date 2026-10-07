@@ -24,7 +24,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING Android APK / AAB 构建、签名、验证及可选 Google Play 上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。保留 VERSION_CODE 参数及 Jenkins 构建编号。管线源：/Users/daisei/HeadGame/Jenkinsfile.android。</description>
+  <description>HEADSLING Android APK / AAB 构建、签名、验证及可选 Google Play 上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。应用版本读取构建源码的 Unity Player Settings Version，保留 VERSION_CODE 参数及 Jenkins 构建编号。管线源：/Users/daisei/HeadGame/Jenkinsfile.android。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -63,12 +63,6 @@
             <string>6000.5.1f1</string>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>APP_VERSION</name>
-          <description>Android versionName.</description>
-          <defaultValue>1.0</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>VERSION_CODE</name>
           <description>Positive Android versionCode; blank uses Jenkins BUILD_NUMBER.</description>
@@ -121,6 +115,23 @@
     return value.startsWith(&apos;*/&apos;) ? value : &quot;*/${value}&quot;
 }
 
+String readProjectAppVersion(String projectSettings)
+{
+    def lines = projectSettings.readLines().findAll { it.startsWith(&apos;  bundleVersion:&apos;) }
+    if (lines.size() != 1) {
+        error(&apos;ProjectSettings/ProjectSettings.asset must contain exactly one PlayerSettings bundleVersion.&apos;)
+    }
+    String version = lines[0].split(&apos;:&apos;, 2)[1].trim()
+    if (version.length() &gt;= 2 &amp;&amp; ((version.startsWith(&apos;&quot;&apos;) &amp;&amp; version.endsWith(&apos;&quot;&apos;)) ||
+        (version.startsWith(&quot;&apos;&quot;) &amp;&amp; version.endsWith(&quot;&apos;&quot;)))) {
+        version = version.substring(1, version.length() - 1)
+    }
+    if (!(version ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
+        error(&quot;Unity Player Settings Version must contain one to three numeric components: ${version}&quot;)
+    }
+    return version
+}
+
 pipeline {
     agent {
         node {
@@ -142,7 +153,6 @@ pipeline {
         string(name: &apos;LOCAL_SOURCE_PATH&apos;, defaultValue: &apos;/Users/daisei/HeadGame&apos;, description: &apos;Read-only source for LOCAL_SNAPSHOT. Caches and credentials are excluded.&apos;)
         string(name: &apos;BRANCH&apos;, defaultValue: &apos;main&apos;, description: &apos;Git branch for GIT mode. The branch must use the dedicated HEADSLING asset bucket.&apos;)
         choice(name: &apos;UNITY_VERSION&apos;, choices: [&apos;6000.5.1f1&apos;], description: &apos;Unity version; must match ProjectVersion.txt.&apos;)
-        string(name: &apos;APP_VERSION&apos;, defaultValue: &apos;1.0&apos;, description: &apos;Android versionName.&apos;)
         string(name: &apos;VERSION_CODE&apos;, defaultValue: &apos;&apos;, description: &apos;Positive Android versionCode; blank uses Jenkins BUILD_NUMBER.&apos;)
         choice(name: &apos;ARTIFACT_FORMAT&apos;, choices: [&apos;APK&apos;, &apos;AAB&apos;], description: &apos;APK for direct installation; AAB for bundle validation or Google Play.&apos;)
         choice(name: &apos;SIGNING&apos;, choices: [&apos;Debug&apos;, &apos;Release&apos;], description: &apos;Debug supports test APK/AAB builds; Google Play uploads must use Release.&apos;)
@@ -226,9 +236,7 @@ PY
                     if (missingBuildFiles) {
                         error(&quot;Branch ${env.HEADSLING_BRANCH} is missing CI build files: ${missingBuildFiles.join(&apos;, &apos;)}. Merge the mobile pipeline changes into that branch before building.&quot;)
                     }
-                    if (!(params.APP_VERSION ==~ /^[0-9]+([.][0-9]+){0,2}$/)) {
-                        error(&quot;APP_VERSION must contain one to three numeric components: ${params.APP_VERSION}&quot;)
-                    }
+                    env.HEADSLING_APP_VERSION = readProjectAppVersion(readFile(&apos;ProjectSettings/ProjectSettings.asset&apos;))
                     String projectUnityVersion = readFile(&apos;ProjectSettings/ProjectVersion.txt&apos;)
                         .readLines()
                         .find { it.startsWith(&apos;m_EditorVersion:&apos;) }
@@ -257,7 +265,7 @@ PY
                         error(&apos;VERSION_CODE must be between 1 and 2100000000.&apos;)
                     }
                     env.HEADSLING_BUILD_NUMBER = versionCode
-                    currentBuild.description = &quot;Version: ${params.APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nSource: ${env.HEADSLING_SOURCE_MODE}\nBranch: ${env.HEADSLING_BRANCH}\nUnity: ${env.HEADSLING_UNITY_VERSION}\nGit: ${env.HEADSLING_GIT_REVISION}&quot;
+                    currentBuild.description = &quot;Version: ${env.HEADSLING_APP_VERSION}\nBuild: ${env.BUILD_NUMBER}\nSource: ${env.HEADSLING_SOURCE_MODE}\nBranch: ${env.HEADSLING_BRANCH}\nUnity: ${env.HEADSLING_UNITY_VERSION}\nGit: ${env.HEADSLING_GIT_REVISION}&quot;
                 }
                 sh &apos;&apos;&apos;#!/bin/bash
 set -euo pipefail
@@ -267,6 +275,7 @@ test -x &quot;$UNITY_ROOT/PlaybackEngines/AndroidPlayer/OpenJDK/bin/java&quot;
 test -d &quot;$UNITY_ROOT/PlaybackEngines/AndroidPlayer/SDK&quot;
 test -d &quot;$UNITY_ROOT/PlaybackEngines/AndroidPlayer/NDK&quot;
 command -v python3 &gt;/dev/null
+echo &quot;App version $HEADSLING_APP_VERSION (Unity Player Settings)&quot;
 
 # Refuse an older Git branch or local source that still embeds the shared bucket.
 python3 - &lt;&lt;&apos;PY&apos;
@@ -294,7 +303,6 @@ mkdir -p &quot;$WORKSPACE/Builds/Android&quot; &quot;$WORKSPACE/Logs/Jenkins&quo
                 sh &apos;&apos;&apos;#!/bin/bash
 set -euo pipefail
 UNITY_EXECUTABLE=&quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/Unity.app/Contents/MacOS/Unity&quot;
-HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
 &quot;$UNITY_EXECUTABLE&quot; -projectPath &quot;$WORKSPACE&quot; -quit -batchmode -nographics \
   -buildTarget Android -executeMethod HeadSling.Editor.HeadSlingCIBuild.BuildAddressables \
   -logFile &quot;$WORKSPACE/Logs/Jenkins/addressables_android_${BUILD_NUMBER}.log&quot;
@@ -314,7 +322,6 @@ UNITY_LOG=&quot;$WORKSPACE/Logs/Jenkins/android_${BUILD_NUMBER}.log&quot;
 trap &apos;python3 tools/ci/redact-build-log.py &quot;$UNITY_LOG&quot;&apos; EXIT
 HEADSLING_PREBUILT_ADDRESSABLES=true \
 HEADSLING_BUNDLE_ID=&quot;$APP_BUNDLE_ID&quot; \
-HEADSLING_APP_VERSION=&quot;$APP_VERSION&quot; \
 HEADSLING_ANDROID_FORMAT=&quot;$ARTIFACT_FORMAT&quot; \
 HEADSLING_ANDROID_SIGNING=&quot;$SIGNING&quot; \
 &quot;$UNITY_EXECUTABLE&quot; -projectPath &quot;$WORKSPACE&quot; -quit -batchmode -nographics \
@@ -384,7 +391,7 @@ shasum -a 256 &quot;$ARTIFACT&quot; &gt; &quot;$ARTIFACT.sha256&quot;
                             language: &apos;zh-CN&apos;,
                             text: releaseNotes
                         ]],
-                        releaseName: &quot;${params.APP_VERSION} (${env.HEADSLING_BUILD_NUMBER})&quot;,
+                        releaseName: &quot;${env.HEADSLING_APP_VERSION} (${env.HEADSLING_BUILD_NUMBER})&quot;,
                         rolloutPercentage: &apos;100&apos;,
                         trackName: &apos;internal&apos;
                     )
