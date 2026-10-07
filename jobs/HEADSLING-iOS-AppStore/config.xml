@@ -211,6 +211,9 @@ PY
             steps {
                 script {
                     def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/prepare-ios-signing.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
+                    if (params.UPLOAD_APP_STORE) {
+                        requiredBuildFiles.add(&apos;tools/ci/check-online-backend.py&apos;)
+                    }
                     def missingBuildFiles = requiredBuildFiles.findAll { !fileExists(it) }
                     if (missingBuildFiles) {
                         error(&quot;Branch ${env.HEADSLING_BRANCH} is missing CI build files: ${missingBuildFiles.join(&apos;, &apos;)}. Merge the mobile pipeline changes into that branch before building.&quot;)
@@ -265,6 +268,12 @@ rm -rf &quot;$WORKSPACE/$XCODE_OUTPUT_PATH&quot; &quot;$WORKSPACE/$ARCHIVE_PATH&
        &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot;
 mkdir -p &quot;$WORKSPACE/Logs/Jenkins&quot; &quot;$WORKSPACE/$(dirname &quot;$ARCHIVE_PATH&quot;)&quot; \
          &quot;$WORKSPACE/$IPA_OUTPUT_PATH&quot; &quot;$WORKSPACE/$DERIVED_DATA_PATH&quot;
+
+# Published clients must be able to load accounts on the deployed backend.
+if [ &quot;$UPLOAD_APP_STORE&quot; = &quot;true&quot; ]; then
+    python3 tools/ci/check-online-backend.py --timeout 30 \
+      --report Logs/Jenkins/online-backend-preflight.json
+fi
 
 echo &quot;Branch $HEADSLING_BRANCH&quot;
 echo &quot;Git $HEADSLING_GIT_REVISION&quot;
@@ -418,6 +427,9 @@ python3 tools/ci/verify-addressables.py Logs/Jenkins/addressables-iOS.json &quot
                 ]) {
                     sh &apos;&apos;&apos;#!/bin/bash
 set -euo pipefail
+
+python3 tools/ci/check-online-backend.py --timeout 30 \
+  --report Logs/Jenkins/online-backend-upload.json
 
 PRIVATE_KEY=&quot;$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY}.p8&quot;
 if [ ! -f &quot;$PRIVATE_KEY&quot; ]; then
