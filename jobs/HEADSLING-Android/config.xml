@@ -25,7 +25,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING Android 构建、签名、验证及 Google Play 上传，默认 AAB、Release 并发布到内部测试轨道。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。应用版本及 Android versionCode 均读取构建源码的 Unity Player Settings，不提供独立版本参数；Jenkins 构建编号用于运行记录。管线源：/Users/daisei/HeadGame/Jenkinsfile.android。</description>
+  <description>HEADSLING Android 构建、签名、验证及 Google Play 上传，默认 AAB、Release 并发布到内部测试轨道。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；资源使用 headsling-assets-664894817585/release/headsling/&lt;应用版本&gt;/config/v1，旧 1.1 目录保留。应用版本及 Android versionCode 均读取构建源码的 Unity Player Settings，不提供独立版本参数；Jenkins 构建编号用于运行记录。管线源：/Users/daisei/HeadGame/Jenkinsfile.android。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -251,7 +251,7 @@ PY
                     if (env.UPLOAD_GOOGLE_PLAY == &apos;true&apos; &amp;&amp; (env.ARTIFACT_FORMAT != &apos;AAB&apos; || env.SIGNING != &apos;Release&apos;)) {
                         error(&apos;UPLOAD_GOOGLE_PLAY requires ARTIFACT_FORMAT=AAB and SIGNING=Release.&apos;)
                     }
-                    def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/redact-build-log.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
+                    def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/redact-build-log.py&apos;, &apos;tools/ci/solo_release_paths.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
                     if (env.UPLOAD_GOOGLE_PLAY == &apos;true&apos;) {
                         requiredBuildFiles.add(&apos;tools/ci/check-online-backend.py&apos;)
                     }
@@ -291,15 +291,9 @@ command -v python3 &gt;/dev/null
 echo &quot;App version $HEADSLING_APP_VERSION (Unity Player Settings)&quot;
 echo &quot;Android versionCode $HEADSLING_BUILD_NUMBER (Unity Player Settings)&quot;
 
-# Refuse an older Git branch or local source that still embeds the shared bucket.
-python3 - &lt;&lt;&apos;PY&apos;
-import json
-with open(&apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;, encoding=&apos;utf-8&apos;) as stream:
-    settings = json.load(stream)
-expected = &apos;https://headsling-assets-664894817585.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
-if settings.get(&apos;RemoteCatalogRoot&apos;) != expected:
-    raise SystemExit(&apos;Source must use the dedicated HEADSLING bucket RemoteCatalogRoot: &apos; + expected)
-PY
+# Generate settings inside this snapshot from its saved Unity app version.
+# Never copy new catalogs to the legacy 1.1 S3 directory.
+python3 tools/ci/solo_release_paths.py --prepare-runtime-settings
 
 if [ &quot;$CLEAN_LIBRARY&quot; = true ]; then rm -rf &quot;$WORKSPACE/Library&quot;; fi
 rm -rf &quot;$WORKSPACE/Builds/Android&quot;

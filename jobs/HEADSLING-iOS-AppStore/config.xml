@@ -21,7 +21,7 @@
       </options>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>HEADSLING iOS App Store 构建、签名、验证与上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；源码必须使用独立存储桶 headsling-assets-664894817585。应用版本读取构建源码的 Unity Player Settings Version，构建编号沿用 Jenkins BUILD_NUMBER。管线源：/Users/daisei/HeadGame/Jenkinsfile.ios。</description>
+  <description>HEADSLING iOS App Store 构建、签名、验证与上传。默认从本地 /Users/daisei/HeadGame 已保存源码快照构建，支持 Git 分支；资源使用 headsling-assets-664894817585/release/headsling/&lt;应用版本&gt;/config/v1，旧 1.1 目录保留。应用版本读取构建源码的 Unity Player Settings Version，构建编号沿用 Jenkins BUILD_NUMBER。管线源：/Users/daisei/HeadGame/Jenkinsfile.ios。</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
@@ -210,7 +210,7 @@ PY
         stage(&apos;Preflight&apos;) {
             steps {
                 script {
-                    def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/prepare-ios-signing.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
+                    def requiredBuildFiles = [&apos;Assets/Editor/HeadSlingCIBuild.cs&apos;, &apos;tools/ci/verify-addressables.py&apos;, &apos;tools/ci/prepare-ios-signing.py&apos;, &apos;tools/ci/solo_release_paths.py&apos;, &apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;]
                     if (params.UPLOAD_APP_STORE) {
                         requiredBuildFiles.add(&apos;tools/ci/check-online-backend.py&apos;)
                     }
@@ -245,16 +245,9 @@ fi
 test -d &quot;/Applications/Unity/Hub/Editor/${HEADSLING_UNITY_VERSION}/PlaybackEngines/iOSSupport&quot;
 command -v python3 &gt;/dev/null
 
-# Both source modes must embed the newly dedicated bucket. In particular, a
-# future Git build must not silently use an older branch with the shared bucket.
-python3 - &lt;&lt;&apos;PY&apos;
-import json
-with open(&apos;Assets/Resources/HeadSling/solo-content-settings.json&apos;, encoding=&apos;utf-8&apos;) as stream:
-    settings = json.load(stream)
-expected = &apos;https://headsling-assets-664894817585.s3.ap-northeast-1.amazonaws.com/release/headsling/config/v1&apos;
-if settings.get(&apos;RemoteCatalogRoot&apos;) != expected:
-    raise SystemExit(&apos;Source must use the dedicated HEADSLING bucket RemoteCatalogRoot: &apos; + expected)
-PY
+# Generate settings inside this snapshot from its saved Unity app version.
+# Never copy new catalogs to the legacy 1.1 S3 directory.
+python3 tools/ci/solo_release_paths.py --prepare-runtime-settings
 
 if [ &quot;$CLEAN_LIBRARY&quot; = &quot;true&quot; ]; then
     rm -rf &quot;$WORKSPACE/Library&quot;
